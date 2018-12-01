@@ -2,11 +2,11 @@
   <el-row :gutter="40" class="panel-group">
     <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
       <div class="card-panel" @click="jumpRouter('organizations')">
-        <div class="card-panel-icon-wrapper icon-people">
-          <svg-icon icon-class="peoples" class-name="card-panel-icon" />
+        <div class="card-panel-icon-wrapper">
+          <svg-icon icon-class="组织" class-name="card-panel-icon" />
         </div>
         <div class="card-panel-description">
-          <div class="card-panel-text">{{$t('panel.organizations')}}</div>
+          <div class="card-panel-text">{{ $t('panel.organizations') }}</div>
           <count-to :start-val="0" :end-val="7" :duration="2600" class="card-panel-num"/>
         </div>
       </div>
@@ -14,33 +14,33 @@
 
     <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
       <div class="card-panel" @click="jumpRouter('Customers')">
-        <div class="card-panel-icon-wrapper icon-money">
-          <svg-icon icon-class="money" class-name="card-panel-icon" />
+        <div class="card-panel-icon-wrapper">
+          <svg-icon icon-class="客户" class-name="card-panel-icon" />
         </div>
         <div class="card-panel-description">
-          <div class="card-panel-text">{{$t('panel.customers')}}</div>
+          <div class="card-panel-text">{{ $t('panel.customers') }}</div>
           <count-to :start-val="0" :end-val="91" :duration="3200" class="card-panel-num"/>
         </div>
       </div>
     </el-col>
     <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
       <div class="card-panel" @click="jumpRouter('products')">
-        <div class="card-panel-icon-wrapper icon-message">
-          <svg-icon icon-class="message" class-name="card-panel-icon" />
+        <div class="card-panel-icon-wrapper">
+          <svg-icon icon-class="产品" class-name="card-panel-icon" />
         </div>
         <div class="card-panel-description">
-          <div class="card-panel-text">{{$t('panel.products')}}</div>
+          <div class="card-panel-text">{{ $t('panel.products') }}</div>
           <count-to :start-val="0" :end-val="73" :duration="3000" class="card-panel-num"/>
         </div>
       </div>
     </el-col>
     <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
       <div class="card-panel" @click="jumpRouter('Devices')">
-        <div class="card-panel-icon-wrapper icon-shopping">
-          <svg-icon icon-class="shopping" class-name="card-panel-icon" />
+        <div class="card-panel-icon-wrapper">
+          <svg-icon icon-class="设备" class-name="card-panel-icon" />
         </div>
         <div class="card-panel-description">
-          <div class="card-panel-text">{{$t('panel.devices')}}</div>
+          <div class="card-panel-text">{{ $t('panel.devices') }}</div>
           <count-to :start-val="0" :end-val="1360" :duration="3600" class="card-panel-num"/>
         </div>
       </div>
@@ -59,8 +59,8 @@ export default {
     handleSetLineChartData(type) {
       this.$emit('handleSetLineChartData', type)
     },
-    jumpRouter(url){
-      this.$router.push({path:'/'+url+'/index'})
+    jumpRouter(url) {
+      this.$router.push({ path: '/' + url + '/index' })
     }
   }
 }

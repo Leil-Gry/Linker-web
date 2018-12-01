@@ -1,7 +1,7 @@
 /** When your routing table is too long, you can split it into small modules**/
 
 import Layout from '@/views/layout/Layout'
-import tableRouter from "./table";
+// import tableRouter from './table'
 
 const componentsRouter = {
   path: '/components',
@@ -11,7 +11,7 @@ const componentsRouter = {
   meta: {
     title: 'components',
     icon: 'component',
-    roles: ['admin','webAdmin']
+    roles: ['admin']
   },
   children: [
     {

@@ -71,7 +71,7 @@ export const constantRouterMap = [
         path: 'dashboard',
         component: () => import('@/views/dashboard/index'),
         name: 'Dashboard',
-        meta: { title: 'dashboard', icon: 'dashboard', noCache: true }
+        meta: { title: 'dashboard', icon: '首页', noCache: true }
       }
     ]
   }
@@ -101,7 +101,7 @@ export const asyncRouterMap = [
         name: 'PagePermission',
         meta: {
           title: 'pagePermission',
-          roles: ['admin','editor'] // or you can only set roles in sub nav
+          roles: ['admin', 'editor'] // or you can only set roles in sub nav
         }
       },
       {
@@ -175,7 +175,7 @@ export const asyncRouterMap = [
     path: '/documentation',
     component: Layout,
     redirect: '/documentation/index',
-    meta:{roles: ['admin']},
+    meta: { roles: ['admin'] },
     children: [
       {
         path: 'index',
@@ -189,7 +189,7 @@ export const asyncRouterMap = [
     path: '/guide',
     component: Layout,
     redirect: '/guide/index',
-    meta:{roles: ['admin']},
+    meta: { roles: ['admin'] },
     children: [
       {
         path: 'index',
@@ -202,7 +202,7 @@ export const asyncRouterMap = [
   {
     path: '/tab',
     component: Layout,
-    meta:{roles: ['admin']},
+    meta: { roles: ['admin'] },
     children: [
       {
         path: 'index',
@@ -244,7 +244,7 @@ export const asyncRouterMap = [
     path: '/error-log',
     component: Layout,
     redirect: 'noredirect',
-    meta:{roles: ['admin']},
+    meta: { roles: ['admin'] },
     children: [
       {
         path: 'log',
@@ -293,7 +293,7 @@ export const asyncRouterMap = [
     redirect: '/zip/download',
     alwaysShow: true,
     meta: { title: 'zip', icon: 'zip',
-      roles: ['admin']},
+      roles: ['admin'] },
     children: [
       {
         path: 'download',
@@ -308,7 +308,7 @@ export const asyncRouterMap = [
     path: '/theme',
     component: Layout,
     redirect: 'noredirect',
-    meta:{roles: ['admin']},
+    meta: { roles: ['admin'] },
     children: [
       {
         path: 'index',
@@ -323,7 +323,7 @@ export const asyncRouterMap = [
     path: '/clipboard',
     component: Layout,
     redirect: 'noredirect',
-    meta:{roles: ['admin']},
+    meta: { roles: ['admin'] },
     children: [
       {
         path: 'index',
@@ -337,7 +337,7 @@ export const asyncRouterMap = [
   {
     path: '/i18n',
     component: Layout,
-    meta:{roles: ['admin']},
+    meta: { roles: ['admin'] },
     children: [
       {
         path: 'index',
@@ -351,7 +351,7 @@ export const asyncRouterMap = [
   {
     path: 'external-link',
     component: Layout,
-    meta:{roles: ['admin']},
+    meta: { roles: ['admin'] },
     children: [
       {
         path: 'https://github.com/PanJiaChen/vue-element-admin',
@@ -378,13 +378,13 @@ export const asyncRouterMap = [
     path: '/organizations',
     component: Layout,
     redirect: 'noredirect',
-    meta:{roles: ['webAdmin']},
+    meta: { roles: ['webAdmin'] },
     children: [
       {
         path: 'index',
         component: () => import('@/views/organizations/index'),
         name: 'organizations',
-        meta: { title: 'organizations', icon: 'theme' }
+        meta: { title: 'organizations', icon: '组织' }
       }
     ]
   },
@@ -392,13 +392,13 @@ export const asyncRouterMap = [
     path: '/customers',
     component: Layout,
     redirect: 'noredirect',
-    meta:{roles: ['webAdmin','organizationAdmin','customerAdmin']},
+    meta: { roles: ['webAdmin', 'organizationAdmin', 'customerAdmin'] },
     children: [
       {
         path: 'index',
         component: () => import('@/views/customers/index'),
         name: 'customers',
-        meta: { title: 'customers', icon: 'theme' }
+        meta: { title: 'customers', icon: '客户' }
       }
     ]
   },
@@ -406,13 +406,13 @@ export const asyncRouterMap = [
     path: '/products',
     component: Layout,
     redirect: 'noredirect',
-    meta:{roles: ['webAdmin','organizationAdmin','customerAdmin']},
+    meta: { roles: ['webAdmin', 'organizationAdmin', 'customerAdmin'] },
     children: [
       {
         path: 'index',
         component: () => import('@/views/products/index'),
         name: 'products',
-        meta: { title: 'products', icon: 'theme' }
+        meta: { title: 'products', icon: '产品' }
       }
     ]
   },
@@ -420,13 +420,28 @@ export const asyncRouterMap = [
     path: '/devices',
     component: Layout,
     redirect: 'noredirect',
-    meta:{roles: ['webAdmin','organizationAdmin','customerAdmin']},
+    meta: { roles: ['webAdmin', 'organizationAdmin', 'customerAdmin'] },
     children: [
       {
         path: 'index',
         component: () => import('@/views/devices/index'),
         name: 'devices',
-        meta: { title: 'devices', icon: 'theme' }
+        meta: { title: 'devices', icon: '设备' }
+      }
+    ]
+  },
+  {
+    path: '/deviceDetail',
+    component: Layout,
+    meta: { roles: ['webAdmin', 'organizationAdmin', 'customerAdmin'] },
+    hidden: true,
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/deviceDetail/index'),
+        name: 'deviceDetail',
+        hidden: true,
+        meta: { title: 'deviceDetail', icon: '设备' }
       }
     ]
   },
