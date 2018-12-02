@@ -84,32 +84,8 @@ export default {
     border-color: rgba(0, 0, 0, .05);
     &:hover {
       .card-panel-icon-wrapper {
-        color: #fff;
+        color: rgb(86, 174, 224);
       }
-      .icon-people {
-         background: #40c9c6;
-      }
-      .icon-message {
-        background: #36a3f7;
-      }
-      .icon-money {
-        background: #f4516c;
-      }
-      .icon-shopping {
-        background: #34bfa3
-      }
-    }
-    .icon-people {
-      color: #40c9c6;
-    }
-    .icon-message {
-      color: #36a3f7;
-    }
-    .icon-money {
-      color: #f4516c;
-    }
-    .icon-shopping {
-      color: #34bfa3
     }
     .card-panel-icon-wrapper {
       float: left;
