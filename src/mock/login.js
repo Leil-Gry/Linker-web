@@ -20,7 +20,8 @@ const userMap = {
     token: 'webAdmin',
     introduction: '我是webAdmin',
     avatar: 'https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif',
-    name: 'webAdmin'
+    name: 'webAdmin',
+    countOrganization: '666'
   },
   organizationAdmin: {
     roles: ['organizationAdmin'],
@@ -28,7 +29,7 @@ const userMap = {
     introduction: '我是organizationAdmin',
     avatar: 'https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif',
     name: 'organizationAdmin',
-    myOwnOrganization:'123org',
+    myOwnOrganization: '123org'
   },
   customerAdmin: {
     roles: ['customerAdmin'],
@@ -36,7 +37,7 @@ const userMap = {
     introduction: '我是customerAdmin',
     avatar: 'https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif',
     name: 'customerAdmin',
-    myOwnCustomer:'starcustomer'
+    myOwnCustomer: 'starcustomer'
   }
 }
 

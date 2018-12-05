@@ -13,7 +13,8 @@ const user = {
     roles: [],
     setting: {
       articlePlatform: []
-    }
+    },
+    countOrganization: ''
   },
 
   mutations: {
@@ -40,6 +41,9 @@ const user = {
     },
     SET_ROLES: (state, roles) => {
       state.roles = roles
+    },
+    SET_countOrganization: (state, countOrganization) => {
+      state.countOrganization = countOrganization
     }
   },
 
@@ -79,6 +83,7 @@ const user = {
           commit('SET_NAME', data.name)
           commit('SET_AVATAR', data.avatar)
           commit('SET_INTRODUCTION', data.introduction)
+          commit('SET_countOrganization', data.countOrganization)
           resolve(response)
         }).catch(error => {
           reject(error)
