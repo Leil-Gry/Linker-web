@@ -1,4 +1,4 @@
-import { loginByUsername, logout, getUserInfo } from '@/api/login'
+import { loginByUsername, logout, getUserInfo, getUser } from '@/api/login'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 
 const user = {
@@ -85,6 +85,19 @@ const user = {
           commit('SET_INTRODUCTION', data.introduction)
           commit('SET_countOrganization', data.countOrganization)
           resolve(response)
+        }).catch(error => {
+          reject(error)
+        })
+      })
+    },
+    getUser() {
+      return new Promise((resolve, reject) => {
+        getUser().then(response => {
+          if (!response.data) { // 由于mockjs 不支持自定义状态码只能这样hack
+            reject('error')
+          }
+          const data = response.data
+          return data
         }).catch(error => {
           reject(error)
         })

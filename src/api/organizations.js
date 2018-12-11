@@ -24,11 +24,11 @@ export function fetchPv(pv) {
   })
 }
 
-export function getStaffList(data){
+export function getStaffList(data) {
   return request({
-    url:'/organizations/staffList',
-    method:'get',
-    params:{data}
+    url: '/organizations/staffList',
+    method: 'get',
+    params: { data }
   })
 }
 

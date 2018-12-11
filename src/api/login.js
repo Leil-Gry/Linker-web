@@ -27,3 +27,9 @@ export function getUserInfo(token) {
   })
 }
 
+export function getUser() {
+  return request({
+    url: 'https://101.132.180.5:9002/api/v1alpha1/user',
+    method: 'get'
+  })
+}

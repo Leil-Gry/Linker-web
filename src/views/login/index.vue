@@ -38,6 +38,7 @@
       </el-form-item>
 
       <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">{{ $t('login.logIn') }}</el-button>
+      <el-button @click="testAPI">testAPI</el-button>
 
       <div class="tips">
         <span>{{ $t('login.username') }} : webAdmin</span>
@@ -48,15 +49,14 @@
         <span>{{ $t('login.password') }} : {{ $t('login.any') }}</span>
       </div>
 
-
     </el-form>
 
     <!--<el-dialog :title="$t('login.thirdparty')" :visible.sync="showDialog" append-to-body>-->
-      <!--{{ $t('login.thirdpartyTips') }}-->
-      <!--<br>-->
-      <!--<br>-->
-      <!--<br>-->
-      <!--<social-sign />-->
+    <!--{{ $t('login.thirdpartyTips') }}-->
+    <!--<br>-->
+    <!--<br>-->
+    <!--<br>-->
+    <!--<social-sign />-->
     <!--</el-dialog>-->
 
   </div>
@@ -139,23 +139,13 @@ export default {
         }
       })
     },
-    afterQRScan() {
-      // const hash = window.location.hash.slice(1)
-      // const hashObj = getQueryObject(hash)
-      // const originUrl = window.location.origin
-      // history.replaceState({}, '', originUrl)
-      // const codeMap = {
-      //   wechat: 'code',
-      //   tencent: 'code'
-      // }
-      // const codeName = hashObj[codeMap[this.auth_type]]
-      // if (!codeName) {
-      //   alert('第三方登录失败')
-      // } else {
-      //   this.$store.dispatch('LoginByThirdparty', codeName).then(() => {
-      //     this.$router.push({ path: '/' })
-      //   })
-      // }
+    testAPI() {
+      this.$store.dispatch('getUser').then(() => {
+        this.loading = false
+        this.$router.push({ path: this.redirect || '/' })
+      }).catch(() => {
+        this.loading = false
+      })
     }
   }
 }
