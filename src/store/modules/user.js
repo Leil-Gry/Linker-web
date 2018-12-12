@@ -50,9 +50,9 @@ const user = {
   actions: {
     // 用户名登录
     LoginByUsername({ commit }, userInfo) {
-      const username = userInfo.username.trim()
+      const email = userInfo.email.trim()
       return new Promise((resolve, reject) => {
-        loginByUsername(username, userInfo.password).then(response => {
+        loginByUsername(email, userInfo.password).then(response => {
           const data = response.data
           commit('SET_TOKEN', data.token)
           setToken('Admin-Token', response.data.token)
@@ -92,7 +92,7 @@ const user = {
     },
     getUser() {
       return new Promise((resolve, reject) => {
-        getUser().then(response => {
+        getUser('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiIiLCJlbWFpbCI6IiIsImV4cCI6MTU0NDYzMTE1OSwiaXNzIjoiRm9nRG9uZyIsIm5iZiI6MTU0NDYyNjU1OX0.6JNUSZ0_s4haYO4KkiZ9OtlC7GKMEoJyr8RQh2t44SU').then(response => {
           if (!response.data) { // 由于mockjs 不支持自定义状态码只能这样hack
             reject('error')
           }
