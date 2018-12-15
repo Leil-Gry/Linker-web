@@ -1,64 +1,65 @@
 import request from '@/utils/request'
 
-export function fetchList(query) {
+export function createOrganization(authorization, data) {
   return request({
-    url: '/organizations/list',
-    method: 'get',
-    params: query
-  })
-}
-
-export function fetchArticle(id) {
-  return request({
-    url: '/article/detail',
-    method: 'get',
-    params: { id }
-  })
-}
-
-export function fetchPv(pv) {
-  return request({
-    url: '/article/pv',
-    method: 'get',
-    params: { pv }
-  })
-}
-
-export function getStaffList(data) {
-  return request({
-    url: '/organizations/staffList',
-    method: 'get',
-    params: { data }
-  })
-}
-
-export function createOrganization(data) {
-  return request({
-    url: '/organizations/create',
+    url: '/organization',
     method: 'post',
+    headers: { authorization },
     data
   })
 }
-
-export function updateOrganization(data) {
+export function deleteOrganization(authorization, id) {
   return request({
-    url: '/organizations/update',
-    method: 'post',
+    url: '/organization/' + id,
+    method: 'delete',
+    headers: { authorization }
+  })
+}
+export function updateOrganization(authorization, id, data) {
+  return request({
+    url: '/organization/' + id,
+    method: 'put',
+    headers: { authorization },
     data
+  })
+}
+export function getOrganizationList(authorization) {
+  return request({
+    url: '/organization',
+    method: 'get',
+    headers: { authorization }
   })
 }
 
-export function createStaff(data) {
+export function createOrgStaff(authorization, data) {
   return request({
-    url: '/organizations/createStaff',
+    url: '/user',
     method: 'post',
+    headers: { authorization },
     data
   })
 }
-export function updateStaff(data) {
+export function deleteOrgStaff(authorization, id) {
   return request({
-    url: '/organizations/updateStaff',
-    method: 'post',
+    url: '/user/' + id,
+    method: 'delete',
+    headers: { authorization }
+  })
+}
+export function updateOrgStaff(authorization, id, data) {
+  return request({
+    url: '/user/' + id,
+    method: 'put',
+    headers: { authorization },
     data
   })
 }
+export function getOrgStaffList(authorization, orgId) {
+  return request({
+    url: '/user', // 暂时这样测试，下面的接口还没写好
+    // url: '/organization/'+ orgId + '/user',
+    method: 'get',
+    headers: { authorization }
+  })
+}
+

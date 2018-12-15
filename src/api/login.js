@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-export function loginByUsername(email, password) {
+export function loginByEmail(email, password) {
   const data = {
     email,
     password
@@ -12,24 +12,17 @@ export function loginByUsername(email, password) {
   })
 }
 
-export function logout() {
+export function getUserInfoById(authorization, _id) {
   return request({
-    url: '/login/logout',
-    method: 'post'
-  })
-}
-
-export function getUserInfo(token) {
-  return request({
-    url: '/user/info',
+    url: '/user/' + _id,
     method: 'get',
-    params: { token }
+    headers: { authorization }
   })
 }
 
-export function getUser(authorization) {
+export function getUser(authorization, id) {
   return request({
-    url: '/user',
+    url: '/user/' + id,
     method: 'get',
     headers: { authorization }
   })

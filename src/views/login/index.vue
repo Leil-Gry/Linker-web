@@ -1,26 +1,29 @@
 <template>
   <div class="login-container">
-
-    <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" auto-complete="on" label-position="left">
-
+    <el-form
+      ref="loginForm"
+      :model="loginForm"
+      :rules="loginRules"
+      class="login-form"
+      auto-complete="on"
+      label-position="left"
+    >
       <div class="title-container">
         <h3 class="title">{{ $t('login.title') }}</h3>
         <lang-select class="set-language"/>
       </div>
-
       <el-form-item prop="email">
         <span class="svg-container">
           <svg-icon icon-class="user" />
         </span>
         <el-input
           v-model="loginForm.email"
-          :placeholder="$t('login.username')"
+          :placeholder="$t('login.email')"
           name="email"
           type="text"
           auto-complete="on"
         />
       </el-form-item>
-
       <el-form-item prop="password">
         <span class="svg-container">
           <svg-icon icon-class="password" />
@@ -36,59 +39,44 @@
           <svg-icon icon-class="eye" />
         </span>
       </el-form-item>
-
-      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">{{ $t('login.logIn') }}</el-button>
-      <el-button @click="testAPI">testAPI</el-button>
-
-      <div class="tips">
-        <span>{{ $t('login.username') }} : webAdmin</span>
-        <span>{{ $t('login.password') }} : {{ $t('login.any') }}</span>
-      </div>
-      <div class="tips">
-        <span>{{ $t('login.username') }} : organizationAdmin</span>
-        <span>{{ $t('login.password') }} : {{ $t('login.any') }}</span>
-      </div>
-
+      <el-button
+        :loading="loading"
+        type="primary"
+        style="width:100%;margin-bottom:30px;"
+        @click.native.prevent="handleLogin"
+      >
+        {{ $t('login.logIn') }}
+      </el-button>
     </el-form>
-
-    <!--<el-dialog :title="$t('login.thirdparty')" :visible.sync="showDialog" append-to-body>-->
-    <!--{{ $t('login.thirdpartyTips') }}-->
-    <!--<br>-->
-    <!--<br>-->
-    <!--<br>-->
-    <!--<social-sign />-->
-    <!--</el-dialog>-->
-
   </div>
 </template>
 
 <script>
-import { isvalidUsername } from '@/utils/validate'
+import { validateEmail } from '@/utils/validate'
 import LangSelect from '@/components/LangSelect'
-import SocialSign from './socialsignin'
 
 export default {
   name: 'Login',
-  components: { LangSelect, SocialSign },
+  components: { LangSelect },
   data() {
-    const validateUsername = (rule, value, callback) => {
-      if (!isvalidUsername(value)) {
-        callback(new Error('Please enter the correct user name'))
+    const isvalidateEmail = (rule, value, callback) => {
+      if (!validateEmail(value)) {
+        callback(new Error('请输入正确的邮箱'))
       } else {
         callback()
       }
     }
-    const validatePassword = (rule, value, callback) => {
+    const isvalidatePassword = (rule, value, callback) => {
       callback()
     }
     return {
       loginForm: {
-        username: '',
-        password: '123456'
+        email: '123@qq.com',
+        password: '12'
       },
       loginRules: {
-        username: [{ required: true, trigger: 'blur', validator: validateUsername }],
-        password: [{ required: true, trigger: 'blur', validator: validatePassword }]
+        email: [{ required: true, trigger: 'blur', validator: isvalidateEmail }],
+        password: [{ required: true, trigger: 'blur', validator: isvalidatePassword }]
       },
       passwordType: 'password',
       loading: false,
@@ -106,10 +94,10 @@ export default {
 
   },
   created() {
-    // window.addEventListener('hashchange', this.afterQRScan)
+
   },
   destroyed() {
-    // window.removeEventListener('hashchange', this.afterQRScan)
+
   },
   methods: {
     showPwd() {
@@ -123,24 +111,18 @@ export default {
       this.$refs.loginForm.validate(valid => {
         if (valid) {
           this.loading = true
-          this.$store.dispatch('LoginByUsername', this.loginForm).then(() => {
+          this.$store.dispatch('LoginByEmail', this.loginForm).then(() => {
             this.loading = false
             this.$router.push({ path: this.redirect || '/' })
           }).catch(() => {
             this.loading = false
           })
         } else {
-          console.log('error submit!!')
+          this.$message.error({
+            message: 'error submit!!'
+          })
           return false
         }
-      })
-    },
-    testAPI() {
-      this.$store.dispatch('getUser').then(() => {
-        this.loading = false
-        this.$router.push({ path: this.redirect || '/' })
-      }).catch(() => {
-        this.loading = false
       })
     }
   }

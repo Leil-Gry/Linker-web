@@ -378,7 +378,7 @@ export const asyncRouterMap = [
     path: '/organizations',
     component: Layout,
     redirect: 'noredirect',
-    meta: { roles: ['webAdmin'] },
+    meta: { roles: ['webAdmin', '0'] },
     children: [
       {
         path: 'index',
@@ -392,7 +392,7 @@ export const asyncRouterMap = [
     path: '/customers',
     component: Layout,
     redirect: 'noredirect',
-    meta: { roles: ['webAdmin', 'organizationAdmin', 'customerAdmin'] },
+    meta: { roles: ['webAdmin', 'organizationAdmin', 'customerAdmin', '0'] },
     children: [
       {
         path: 'index',
