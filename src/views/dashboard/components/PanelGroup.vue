@@ -66,7 +66,7 @@ export default {
       this.$router.push({ path: '/' + url + '/index' })
     },
     showOrgButton() {
-      if (this.$store.state.user.roles === 'webAdmin') {
+      if (this.$store.state.user.roles == 'webAdmin') {
         return true
       } else return false
     }

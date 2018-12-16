@@ -76,7 +76,7 @@ const user = {
       const password = userInfo.password
       return new Promise((resolve, reject) => {
         loginByEmail(email, password).then(response => {
-          if (response.data.status === 0) {
+          if (response.data.status == '0') {
             // alert(response.data.msg)
             const data = response.data.data
             setCookie('authToken', data.token)// 在这里设置token到Cookie，通过Cookie里的token查用户信息，存到state里
@@ -104,27 +104,29 @@ const user = {
             let roles
             const data = response.data.data
             switch (true) {
-              case data.role === '0' && data.type === '0' :
+              case data.role == '0' && data.type == '0' :
                 roles = ['webAdmin']; break
-              case data.role === '0' && data.type === '1' :
+              case data.role == '0' && data.type == '1' :
                 roles = ['organizationAdmin']; break
-              case data.role === '0' && data.type === '2' :
+              case data.role == '0' && data.type == '2' :
                 roles = ['customerAdmin']; break
-              case data.role === '1' && data.type === '1' :
+              case data.role == '1' && data.type == '1' :
                 roles = ['organizationStaff']; break
-              case data.role === '1' && data.type === '2' :
+              case data.role == '1' && data.type == '2' :
                 roles = ['customerStaff']; break
+              case data.role == '1' && data.type == '0' :// 其实并不存在这个权限
+                roles = ['webAdmin']; break
             }
-            if (data.orgCount === undefined) { // 现在的API不返回0，手动设置为0
+            if (data.orgCount == undefined) { // 现在的API不返回0，手动设置为0
               data.orgCount = 0
             }
-            if (data.customerCount === undefined) {
+            if (data.customerCount == undefined) {
               data.customerCount = 1
             }
-            if (data.productCount === undefined) {
+            if (data.productCount == undefined) {
               data.productCount = 0
             }
-            if (data.deviceCount === undefined) {
+            if (data.deviceCount == undefined) {
               data.deviceCount = 0
             }
             // 拉取到信息后设置state

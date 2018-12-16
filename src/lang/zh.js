@@ -146,7 +146,7 @@ export default {
     email: '邮箱',
     fullName: '全名',
     isAdmin: '取消管理员',
-    notAdmin: '设置管理员',
+    notAdmin: '设为管理员',
     addStaff: '添加成员',
     password: '密码',
     fullname: '全名',
@@ -167,7 +167,10 @@ export default {
     specificationMax: '最大值',
     specificationUnit: '单位',
     specificationUnitName: '单位名称',
-    editSpecification: '编辑物模型'
+    editSpecification: '编辑物模型',
+    memberCount: '成员数',
+    closeDetail: '隐藏详情',
+    showDetail: '展开详情'
   },
   errorLog: {
     tips: '请点击右上角bug小图标',
