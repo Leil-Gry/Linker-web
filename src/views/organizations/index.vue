@@ -98,20 +98,24 @@
         <el-button @click="dialogFormVisible = false">{{ $t('table.cancel') }}</el-button>
         <el-button v-if="this.$store.state.user.role == 0" type="primary" @click="dialogStatus==='create'?CreateOrganization():UpdateOrganization()">{{ $t('table.confirm') }}</el-button>
       </div>
-      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="90px" style="width: 400px; margin-left:50px;">
-        <el-form-item v-show="showOrgDetailFlag" :label="$t('table.id')" prop="_id" >
-          <el-input v-model="temp._id" :disabled="true"/>
-        </el-form-item>
-        <el-form-item v-show="showOrgDetailFlag" :label="$t('table.creater')" prop="createdBy" >
-          <el-input v-model="temp.createdBy" :disabled="true"/>
-        </el-form-item>
-        <el-form-item v-show="showOrgDetailFlag" :label="$t('table.memberCount')" prop="memberCount" >
-          <el-input v-model="temp.memberCount" :disabled="true"/>
-        </el-form-item>
-        <el-form-item v-show="showOrgDetailFlag" :label="$t('table.createdAt')" prop="createdAt" >
-          <el-input v-model="temp.createdAt" :disabled="true"/>
-        </el-form-item>
-      </el-form>
+      <el-collapse-transition>
+        <div v-show="showOrgDetailFlag">
+          <el-form label-position="left" label-width="90px" style="width: 400px; margin-left:50px;">
+            <el-form-item :label="$t('table.id')" prop="_id" >
+              <el-input v-model="temp._id" :disabled="true"/>
+            </el-form-item>
+            <el-form-item :label="$t('table.creater')" prop="createdBy" >
+              <el-input v-model="temp.createdBy" :disabled="true"/>
+            </el-form-item>
+            <el-form-item :label="$t('table.memberCount')" prop="memberCount" >
+              <el-input v-model="temp.memberCount" :disabled="true"/>
+            </el-form-item>
+            <el-form-item :label="$t('table.createdAt')" prop="createdAt" >
+              <el-input v-model="temp.createdAt" :disabled="true"/>
+            </el-form-item>
+          </el-form>
+        </div>
+      </el-collapse-transition>
     </el-dialog>
 
     <!--staff框-->
@@ -176,20 +180,24 @@
         <el-button @click="updateStaffFormVisible = false">{{ $t('table.cancel') }}</el-button>
         <el-button v-if="this.$store.state.user.role == 0" type="primary" @click="dialogStatus==='create'?CreateStaff(tempOrgName, tempOrgId):UpdateStaff()">{{ $t('table.confirm') }}</el-button>
       </div>
-      <el-form ref="updateStaffForm" :rules="rules" :model="temp" label-position="left" label-width="90px" style="width: 400px; margin-left:50px;">
-        <el-form-item v-show="showOrgDetailFlag" :label="$t('table.creater')" prop="createdBy" >
-          <el-input v-model="temp.createdBy" :disabled="true"/>
-        </el-form-item>
-        <el-form-item v-show="showOrgDetailFlag" :label="$t('table.organizationId')" prop="organizationId" >
-          <el-input v-model="temp.organizationId" :disabled="true"/>
-        </el-form-item>
-        <el-form-item v-show="showOrgDetailFlag" :label="$t('table.createdBy')" prop="createdBy" >
-          <el-input v-model="temp.createdBy" :disabled="true"/>
-        </el-form-item>
-        <el-form-item v-show="showOrgDetailFlag" :label="$t('table.createdAt')" prop="createdAt" >
-          <el-input v-model="temp.createdAt" :disabled="true"/>
-        </el-form-item>
-      </el-form>
+      <el-collapse-transition>
+        <div v-show="showOrgDetailFlag">
+          <el-form label-position="left" label-width="90px" style="width: 400px; margin-left:50px;">
+            <el-form-item :label="$t('table.id')" prop="_id" >
+              <el-input v-model="temp._id" :disabled="true"/>
+            </el-form-item>
+            <el-form-item :label="$t('table.creater')" prop="createdBy" >
+              <el-input v-model="temp.createdBy" :disabled="true"/>
+            </el-form-item>
+            <el-form-item :label="$t('table.organizationId')" prop="organizationId" >
+              <el-input v-model="temp.organizationId" :disabled="true"/>
+            </el-form-item>
+            <el-form-item :label="$t('table.createdAt')" prop="createdAt" >
+              <el-input v-model="temp.createdAt" :disabled="true"/>
+            </el-form-item>
+          </el-form>
+        </div>
+      </el-collapse-transition>
     </el-dialog>
 
   </div>
