@@ -115,7 +115,7 @@ const user = {
               case data.role == '1' && data.type == '2' :
                 roles = ['customerStaff']; break
               case data.role == '1' && data.type == '0' :// 其实并不存在这个权限
-                roles = ['webAdmin']; break
+                roles = ['admin']; break
             }
             if (data.orgCount == undefined) { // 现在的API不返回0，手动设置为0
               data.orgCount = 0

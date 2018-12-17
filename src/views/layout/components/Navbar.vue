@@ -5,9 +5,10 @@
     <breadcrumb class="breadcrumb-container"/>
 
     <div class="right-menu">
+
       <template v-if="device!=='mobile'">
         <error-log class="errLog-container right-menu-item"/>
-
+        <h4 class="right-menu-item welcome">欢迎 {{ this.$store.state.user.roles+':'+this.$store.state.user.email }}</h4>
         <!-- <el-tooltip :content="$t('navbar.screenfull')" effect="dark" placement="bottom">
           <screenfull class="screenfull right-menu-item"/>
         </el-tooltip> -->
@@ -105,7 +106,6 @@ export default {
     float: left;
   }
   .errLog-container {
-    display: inline-block;
     vertical-align: top;
   }
   .right-menu {
@@ -120,6 +120,11 @@ export default {
     }
     .screenfull {
       height: 20px;
+    }
+    .welcome{
+      vertical-align: top;
+      font-family: 微软雅黑;
+      color:gray
     }
     .international{
       vertical-align: top;

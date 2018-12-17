@@ -56,8 +56,7 @@ export function updateOrgStaff(authorization, id, data) {
 }
 export function getOrgStaffList(authorization, orgId) {
   return request({
-    url: '/user', // 暂时这样测试，下面的接口还没写好
-    // url: '/organization/'+ orgId + '/user',
+    url: '/organization/' + orgId + '/user',
     method: 'get',
     headers: { authorization }
   })

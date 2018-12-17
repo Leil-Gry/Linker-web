@@ -66,7 +66,8 @@ export default {
     customers: '客户',
     products: '产品',
     devices: '设备',
-    deviceDetail: '设备详情'
+    deviceDetail: '设备详情',
+    allUsers: '帐号管理'
   },
   navbar: {
     logOut: '退出登录',
@@ -170,7 +171,9 @@ export default {
     editSpecification: '编辑物模型',
     memberCount: '成员数',
     closeDetail: '隐藏详情',
-    showDetail: '展开详情'
+    showDetail: '展开详情',
+    createdAt: '创建时间',
+    organizationId: '组织ID'
   },
   errorLog: {
     tips: '请点击右上角bug小图标',

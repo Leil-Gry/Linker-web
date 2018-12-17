@@ -1,7 +1,12 @@
 <template>
   <div class="app-container">
-    <div v-if="this.$store.state.user.role == 0" class="filter-container">
-      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">{{ $t('table.add') }}</el-button>
+    <div class="filter-container">
+      <!-- TODO -->
+      <el-input :placeholder="$t('table.organizationName')" v-model="temp.name" clearable style="width: 200px;" class="filter-item" />
+      <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" >{{ $t('table.search') }}</el-button>
+      <el-button v-if="this.$store.state.user.role == 0" class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">{{ $t('table.add') }}</el-button>
+      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="document" @click="handleExport">{{ $t('excel.export') }} Excel</el-button>
+
     </div>
     <el-table
       v-loading="listLoading"
@@ -9,10 +14,11 @@
       :data="organizationListData"
       border
       fit
+      stripe
       highlight-current-row
       style="width: 100%;">
       <el-table-column :label="$t('table.organizationName')" min-width="150px">
-        <template slot-scope="scope">
+        <template slot-scope="scope" >
           <span class="link-type" @click="handleUpdate(scope.row)">{{ scope.row.name }}</span>
         </template>
       </el-table-column>
@@ -61,10 +67,11 @@
       </el-table-column>
     </el-table>
 
-    <!-- <div class="pagination-container">
-      分页
-      <el-pagination v-show="total>0" :current-page="listQuery.page" :page-sizes="[10,20,30, 50]" :page-size="listQuery.limit" :total="total" background layout="total, sizes, prev, pager, next, jumper" @size-change="handleSizeChange" @current-change="handleCurrentChange"/>
-    </div> -->
+    <!-- 分页 -->
+    <!-- TODO -->
+    <div class="pagination-container">
+      <el-pagination v-if="organizationListData.length > 0" :page-sizes="5" :total="organizationListData.length" background layout="total, prev, pager, next, jumper" />
+    </div>
 
     <!--编辑框-->
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
@@ -84,8 +91,16 @@
         <el-form-item :label="$t('table.phone')" prop="phone">
           <el-input v-model="temp.phone" :disabled="!(this.$store.state.user.role == 0)" clearable/>
         </el-form-item>
-        <el-form-item v-show="showOrgDetailFlag" :label="$t('table.creater')" prop="createdBy" >
-          <el-input v-model="temp.createdBy" :disabled="true"/>
+      </el-form>
+      <div class="dialogButton">
+        <el-button v-if="dialogStatus !='create' && showOrgDetailFlag == false" @click="showOrgDetailFlag = true">{{ $t('table.showDetail') }}</el-button>
+        <el-button v-if="dialogStatus !='create' && showOrgDetailFlag == true" @click="showOrgDetailFlag = false">{{ $t('table.closeDetail') }}</el-button>
+        <el-button @click="dialogFormVisible = false">{{ $t('table.cancel') }}</el-button>
+        <el-button v-if="this.$store.state.user.role == 0" type="primary" @click="dialogStatus==='create'?CreateOrganization():UpdateOrganization()">{{ $t('table.confirm') }}</el-button>
+      </div>
+      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="90px" style="width: 400px; margin-left:50px;">
+        <el-form-item v-show="showOrgDetailFlag" :label="$t('table.id')" prop="_id" >
+          <el-input v-model="temp._id" :disabled="true"/>
         </el-form-item>
         <el-form-item v-show="showOrgDetailFlag" :label="$t('table.creater')" prop="createdBy" >
           <el-input v-model="temp.createdBy" :disabled="true"/>
@@ -93,13 +108,10 @@
         <el-form-item v-show="showOrgDetailFlag" :label="$t('table.memberCount')" prop="memberCount" >
           <el-input v-model="temp.memberCount" :disabled="true"/>
         </el-form-item>
+        <el-form-item v-show="showOrgDetailFlag" :label="$t('table.createdAt')" prop="createdAt" >
+          <el-input v-model="temp.createdAt" :disabled="true"/>
+        </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button v-if="dialogStatus !='create' && showOrgDetailFlag == false" @click="showOrgDetailFlag = true">{{ $t('table.showDetail') }}</el-button>
-        <el-button v-if="dialogStatus !='create' && showOrgDetailFlag == true" @click="showOrgDetailFlag = false">{{ $t('table.closeDetail') }}</el-button>
-        <el-button @click="dialogFormVisible = false">{{ $t('table.cancel') }}</el-button>
-        <el-button v-if="this.$store.state.user.role == 0" type="primary" @click="dialogStatus==='create'?CreateOrganization():UpdateOrganization()">{{ $t('table.confirm') }}</el-button>
-      </div>
     </el-dialog>
 
     <!--staff框-->
@@ -127,16 +139,19 @@
         </el-table-column>
         <el-table-column v-if="this.$store.state.user.role == 0" :label="$t('table.actions')" align="center" width="220" class-name="small-padding fixed-width">
           <template slot-scope="scope">
-            <el-button v-if="scope.row.role == '0'" @click="handleSetStaff(tempOrgId,scope.row)">{{ $t('table.isAdmin') }}
+            <el-button v-if="scope.row.role == '0'" @click="handleSetStaff(tempOrgName, tempOrgId,scope.row)">{{ $t('table.isAdmin') }}
             </el-button>
             <!--//已经是管理员，文字显示取消管理员-->
-            <el-button v-if="scope.row.role == '1'" type="danger" @click="handleSetAdmin(tempOrgId,scope.row)">{{ $t('table.notAdmin') }}
+            <el-button v-if="scope.row.role == '1'" type="danger" @click="handleSetAdmin(tempOrgName, tempOrgId,scope.row)">{{ $t('table.notAdmin') }}
             </el-button>
             <!--//不是管理员，文字显示设置管理员-->
-            <el-button type="danger" icon="el-icon-delete" @click="DeleteOrgStaff(tempOrgId, scope.row)"/>
+            <el-button type="danger" icon="el-icon-delete" @click="DeleteOrgStaff(tempOrgName, tempOrgId, scope.row)"/>
           </template>
         </el-table-column>
       </el-table>
+      <div class="pagination-container">
+        <el-pagination v-if="staffListData.length > 0" :page-sizes="5" :total="staffListData.length" background layout="total, prev, pager, next, jumper" />
+      </div>
     </el-dialog>
 
     <!--staff修改框-->
@@ -154,17 +169,27 @@
         <el-form-item :label="$t('table.fullname')" prop="fullname">
           <el-input v-model="temp.fullname" :disabled="!(this.$store.state.user.role == 0)" clearable/>
         </el-form-item>
-        <el-form-item :label="$t('table.creater')" prop="createdBy" >
+      </el-form>
+      <div class="dialogButton">
+        <el-button v-if="dialogStatus !='create' && showOrgDetailFlag == false" @click="showOrgDetailFlag = true">{{ $t('table.showDetail') }}</el-button>
+        <el-button v-if="dialogStatus !='create' && showOrgDetailFlag == true" @click="showOrgDetailFlag = false">{{ $t('table.closeDetail') }}</el-button>
+        <el-button @click="updateStaffFormVisible = false">{{ $t('table.cancel') }}</el-button>
+        <el-button v-if="this.$store.state.user.role == 0" type="primary" @click="dialogStatus==='create'?CreateStaff(tempOrgName, tempOrgId):UpdateStaff()">{{ $t('table.confirm') }}</el-button>
+      </div>
+      <el-form ref="updateStaffForm" :rules="rules" :model="temp" label-position="left" label-width="90px" style="width: 400px; margin-left:50px;">
+        <el-form-item v-show="showOrgDetailFlag" :label="$t('table.creater')" prop="createdBy" >
           <el-input v-model="temp.createdBy" :disabled="true"/>
         </el-form-item>
-        <el-form-item :label="$t('table.organizationId')" prop="organizationId" >
+        <el-form-item v-show="showOrgDetailFlag" :label="$t('table.organizationId')" prop="organizationId" >
           <el-input v-model="temp.organizationId" :disabled="true"/>
         </el-form-item>
+        <el-form-item v-show="showOrgDetailFlag" :label="$t('table.createdBy')" prop="createdBy" >
+          <el-input v-model="temp.createdBy" :disabled="true"/>
+        </el-form-item>
+        <el-form-item v-show="showOrgDetailFlag" :label="$t('table.createdAt')" prop="createdAt" >
+          <el-input v-model="temp.createdAt" :disabled="true"/>
+        </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="updateStaffFormVisible = false">{{ $t('table.cancel') }}</el-button>
-        <el-button v-if="this.$store.state.user.role == 0" type="primary" @click="dialogStatus==='create'?CreateStaff(tempOrgId):UpdateStaff()">{{ $t('table.confirm') }}</el-button>
-      </div>
     </el-dialog>
 
   </div>
@@ -184,6 +209,7 @@ export default {
       tableKey: 0,
       listLoading: true,
       tempOrgId: '', // 点某条org的成员时，记录一下，添加成员的时候使用
+      tempOrgName: '',
       showOrgDetailFlag: false,
       temp: {
         email: '',
@@ -208,6 +234,9 @@ export default {
         create: '创建',
         staff: '成员管理'
       },
+      staffListData: [], // 初始化 ，防止.length失效
+      organizationListData: [],
+      nullList: [], // 表格数据为null时，防止.length失效
       rules: {// 表单验证，对应prop值
         name: [{ required: true, message: '请填写组织名称', trigger: 'change' }],
         email: [{ required: true, message: '请填写邮箱', trigger: 'change' }],
@@ -225,7 +254,11 @@ export default {
       // console.log(this.$store.state.user.token)
       getOrganizationList(this.$store.state.user.token).then(response => {
         if (response.data.status == '200') {
-          this.organizationListData = response.data.data
+          if (response.data.data == null) {
+            this.organizationListData = this.nullList
+          } else {
+            this.organizationListData = response.data.data
+          }
           this.listLoading = false
         } else {
           this.$message.error({
@@ -363,13 +396,18 @@ export default {
       this.dialogStatus = 'staff'
       this.staffFormVisible = true
       this.tempOrgId = orgId // 临时存到这里
+      this.tempOrgName = orgName
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
       this.listLoading = true
       getOrgStaffList(this.$store.state.user.token, orgId).then((response) => {
         if (response.data.status == '200') {
-          this.staffListData = response.data.data
+          if (response.data.data == null) {
+            this.staffListData = this.nullList
+          } else {
+            this.staffListData = response.data.data
+          }
           this.listLoading = false
         } else {
           this.$notify.error({
@@ -398,7 +436,7 @@ export default {
         this.$refs['updateStaffForm'].clearValidate()
       })
     },
-    CreateStaff(orgId) {
+    CreateStaff(orgName, orgId) {
       this.$refs['updateStaffForm'].validate((valid) => {
         if (valid) {
           this.$confirm('将添加该成员, 是否继续?', '提示', {
@@ -413,7 +451,7 @@ export default {
             createOrgStaff(this.$store.state.user.token, this.temp).then((response) => {
               if (response.data.status == '200') {
                 this.updateStaffFormVisible = false
-                this.handleStaffList('tempName', orgId)// 刷新该org的成员列表
+                this.handleStaffList(orgName, orgId)// 刷新该org的成员列表
                 this.GetOrganizationList()
                 this.$notify({
                   title: response.data.msg,
@@ -436,7 +474,7 @@ export default {
         }
       })
     },
-    UpdateStaff(orgId) {
+    UpdateStaff(orgName, orgId) {
       this.$refs['updateStaffForm'].validate((valid) => {
         if (valid) {
           this.$confirm('将修改该成员信息, 是否继续?', '提示', {
@@ -448,7 +486,7 @@ export default {
             updateOrgStaff(this.$store.state.user.token, this.temp._id, tempData).then((response) => {
               if (response.data.status == '200') { // 返回type是success时，关弹窗，改列表
                 this.updateStaffFormVisible = false
-                this.handleStaffList('tempName', orgId)// 刷新该org的成员列表
+                this.handleStaffList(orgName, orgId)// 刷新该org的成员列表
                 this.$notify({
                   title: response.data.msg,
                   type: 'success',
@@ -470,7 +508,7 @@ export default {
         }
       })
     },
-    handleSetAdmin(orgId, row) { // 更新成员role为0
+    handleSetAdmin(orgName, orgId, row) { // 更新成员role为0
       this.$confirm('设置该成员为管理员, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -481,7 +519,7 @@ export default {
         const tempData = this.temp
         updateOrgStaff(this.$store.state.user.token, this.temp._id, tempData).then((response) => {
           if (response.data.status == '200') { // 返回type是success时，关弹窗，改列表
-            this.handleStaffList('tempName', orgId)// 刷新该org的成员列表
+            this.handleStaffList(orgName, orgId)// 刷新该org的成员列表
             this.$notify({
               title: response.data.msg,
               type: 'success',
@@ -501,7 +539,7 @@ export default {
         })
       })
     },
-    handleSetStaff(orgId, row) { // 更新成员role为1
+    handleSetStaff(orgName, orgId, row) { // 更新成员role为1
       this.$confirm('取消该成员的管理员权限, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -512,7 +550,7 @@ export default {
         const tempData = this.temp
         updateOrgStaff(this.$store.state.user.token, this.temp._id, tempData).then((response) => {
           if (response.data.status == '200') { // 返回type是success时，关弹窗，改列表
-            this.handleStaffList('tempName', orgId)// 刷新该org的成员列表
+            this.handleStaffList(orgName, orgId)// 刷新该org的成员列表
             this.$notify({
               title: response.data.msg,
               type: 'success',
@@ -532,7 +570,7 @@ export default {
         })
       })
     },
-    DeleteOrgStaff(orgId, row) {
+    DeleteOrgStaff(orgName, orgId, row) {
       this.$confirm('将删除该成员, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -545,7 +583,7 @@ export default {
             type: 'success'
           })
           this.listLoading = false
-          this.handleStaffList('tempName', orgId)// 刷新该org的成员列表
+          this.handleStaffList(orgName, orgId)// 刷新该org的成员列表
           this.GetOrganizationList()
         })
       }).catch(() => {
@@ -555,7 +593,21 @@ export default {
         })
       })
     },
-
+    handleExport() {
+      import('@/vendor/Export2Excel').then(excel => {
+        const tHeader = ['name', 'createdBy']
+        const filterVal = ['name', 'createdBy']
+        const list = this.organizationListData
+        const data = this.formatJson(filterVal, list)
+        excel.export_json_to_excel({
+          header: tHeader,
+          data,
+          filename: 'export-Excel',
+          autoWidth: true,
+          bookType: 'xlsx'
+        })
+      })
+    },
     formatJson(filterVal, jsonData) {
       return jsonData.map(v => filterVal.map(j => {
         if (j === 'timestamp') {
@@ -571,3 +623,9 @@ export default {
   }
 }
 </script>
+<style>
+  .dialogButton{
+    text-align: right;
+    padding-bottom: 20px;
+  }
+</style>
