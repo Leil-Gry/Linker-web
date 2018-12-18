@@ -1,48 +1,64 @@
 import request from '@/utils/request'
 
-export function getCustomerList(data){
+export function createCustomer(authorization, data) {
   return request({
-    url:'/customers/list',
-    method:'get',
-    params:{data}
-  })
-}
-
-export function getStaffList(data){
-  return request({
-    url:'/customers/staffList',
-    method:'get',
-    params:{data}
-  })
-}
-
-export function createCustomer(data) {
-  return request({
-    url: '/customers/create',
+    url: '/customer',
     method: 'post',
+    headers: { authorization },
     data
   })
 }
-
-export function updateCustomer(data) {
+export function deleteCustomer(authorization, id) {
   return request({
-    url: '/customers/update',
-    method: 'post',
+    url: '/customer/' + id,
+    method: 'delete',
+    headers: { authorization }
+  })
+}
+export function updateCustomer(authorization, id, data) {
+  return request({
+    url: '/customer/' + id,
+    method: 'put',
+    headers: { authorization },
     data
+  })
+}
+export function getCustomerList(orgId, authorization) { // 得到org下面的customer
+  return request({
+    url: '/organization/' + orgId + '/customer',
+    method: 'get',
+    headers: { authorization }
   })
 }
 
-export function createStaff(data) {
+export function createCustomerStaff(authorization, data) {
   return request({
-    url: '/customers/createStaff',
+    url: '/user',
     method: 'post',
+    headers: { authorization },
     data
   })
 }
-export function updateStaff(data) {
+export function deleteCustomerStaff(authorization, id) {
   return request({
-    url: '/customers/updateStaff',
-    method: 'post',
+    url: '/user/' + id,
+    method: 'delete',
+    headers: { authorization }
+  })
+}
+export function updateCustomerStaff(authorization, id, data) {
+  return request({
+    url: '/user/' + id,
+    method: 'put',
+    headers: { authorization },
     data
   })
 }
+export function getCustomerStaffList(authorization, customerId) {
+  return request({
+    url: '/customer/' + customerId + '/user',
+    method: 'get',
+    headers: { authorization }
+  })
+}
+

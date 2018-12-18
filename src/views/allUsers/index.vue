@@ -57,10 +57,10 @@
       </el-table-column>
       <el-table-column :label="$t('table.actions')" align="center" width="220" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button v-show="scope.row.email.indexOf(selfString)== -1" v-if="scope.row.role == '0'" @click="handleSetStaff(tempOrgName, tempOrgId,scope.row)">{{ $t('table.isAdmin') }}
+          <el-button v-show="scope.row.email.indexOf(selfString)== -1" v-if="scope.row.role == '0'" @click="handleSetStaff(scope.row)">{{ $t('table.isAdmin') }}
           </el-button>
           <!--//已经是管理员，文字显示取消管理员-->
-          <el-button v-show="scope.row.email.indexOf(selfString)== -1" v-if="scope.row.role == '1'" type="danger" @click="handleSetAdmin(tempOrgName, tempOrgId,scope.row)">{{ $t('table.notAdmin') }}
+          <el-button v-show="scope.row.email.indexOf(selfString)== -1" v-if="scope.row.role == '1'" type="danger" @click="handleSetAdmin(scope.row)">{{ $t('table.notAdmin') }}
           </el-button>
           <!--//不是管理员，文字显示设置管理员-->
           <!--删除按钮-->
@@ -160,7 +160,6 @@ export default {
       allUserListData: [],
       nullList: [], // 表格数据为null时，防止.length失效
       rules: {// 表单验证，对应prop值
-        name: [{ required: true, message: '请填写组织名称', trigger: 'change' }],
         email: [{ required: true, message: '请填写邮箱', trigger: 'change' }],
         password: [{ required: true, message: '请输入密码', trigger: 'change' }],
         fullname: [{ required: true, message: '请填写全名', trigger: 'change' }]
@@ -281,7 +280,7 @@ export default {
         }
       })
     },
-    handleSetAdmin(orgName, orgId, row) { // 更新成员role为0
+    handleSetAdmin(row) { // 更新成员role为0
       this.$confirm('设置该成员为管理员, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -292,7 +291,7 @@ export default {
         const tempData = this.temp
         updateUser(this.$store.state.user.token, this.temp._id, tempData).then((response) => {
           if (response.data.status == '200') { // 返回type是success时，关弹窗，改列表
-            this.handleStaffList(orgName, orgId)// 刷新该org的成员列表
+            this.GetAllUsersList()
             this.$notify({
               title: response.data.msg,
               type: 'success',
@@ -312,7 +311,7 @@ export default {
         })
       })
     },
-    handleSetStaff(orgName, orgId, row) { // 更新成员role为1
+    handleSetStaff(row) { // 更新成员role为1
       this.$confirm('取消该成员的管理员权限, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -323,7 +322,7 @@ export default {
         const tempData = this.temp
         updateUser(this.$store.state.user.token, this.temp._id, tempData).then((response) => {
           if (response.data.status == '200') { // 返回type是success时，关弹窗，改列表
-            this.handleStaffList(orgName, orgId)// 刷新该org的成员列表
+            this.GetAllUsersList()
             this.$notify({
               title: response.data.msg,
               type: 'success',
@@ -345,9 +344,9 @@ export default {
     },
     handleExport() {
       import('@/vendor/Export2Excel').then(excel => {
-        const tHeader = ['name', 'createdBy']
-        const filterVal = ['name', 'createdBy']
-        const list = this.organizationListData
+        const tHeader = ['email', 'createdBy']
+        const filterVal = ['email', 'createdBy']
+        const list = this.allUserListData
         const data = this.formatJson(filterVal, list)
         excel.export_json_to_excel({
           header: tHeader,

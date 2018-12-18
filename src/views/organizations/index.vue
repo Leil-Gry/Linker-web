@@ -43,20 +43,20 @@
       </el-table-column>
       <el-table-column :label="$t('table.countCustomer')" align="center" width="95">
         <template slot-scope="scope">
-          <span v-if="scope.row.countCustomer" class="link-type" @click="jumpRouter('customers','?organizationID='+scope.row.id)">{{ scope.row.countCustomer }}</span>
-          <span v-else class="link-type" @click="jumpRouter('customers','?organizationID='+scope.row.id)">0</span>
+          <span v-if="scope.row.customerCount" class="link-type" @click="jumpRouter('customers','?organizationID='+scope.row._id)">{{ scope.row.customerCount }}</span>
+          <span v-else class="link-type" @click="jumpRouter('customers','?organizationID='+scope.row._id)">0</span>
         </template>
       </el-table-column>
       <el-table-column :label="$t('table.countProducts')" align="center" width="95">
         <template slot-scope="scope">
-          <span v-if="scope.row.countProducts" class="link-type" @click="jumpRouter('products','?organizationID='+scope.row.id)">{{ scope.row.countProducts }}</span>
-          <span v-else class="link-type" @click="jumpRouter('products','?organizationID='+scope.row.id)">0</span>
+          <span v-if="scope.row.productCount" class="link-type" @click="jumpRouter('products','?organizationID='+scope.row._id)">{{ scope.row.productCount }}</span>
+          <span v-else class="link-type" @click="jumpRouter('products','?organizationID='+scope.row._id)">0</span>
         </template>
       </el-table-column>
       <el-table-column :label="$t('table.countDevices')" align="center" width="95">
         <template slot-scope="scope">
-          <span v-if="scope.row.countDevices" class="link-type" @click="jumpRouter('devices','?organizationID='+scope.row.id)">{{ scope.row.countDevices }}</span>
-          <span v-else class="link-type" @click="jumpRouter('devices','?organizationID='+scope.row.id)">0</span>
+          <span v-if="scope.row.deviceCount" class="link-type" @click="jumpRouter('devices','?organizationID='+scope.row._id)">{{ scope.row.deviceCount }}</span>
+          <span v-else class="link-type" @click="jumpRouter('devices','?organizationID='+scope.row._id)">0</span>
         </template>
       </el-table-column>
       <el-table-column v-if="this.$store.state.user.role == 0" :label="$t('table.actions')" align="center" width="90" class-name="small-padding fixed-width">
