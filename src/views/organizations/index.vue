@@ -178,7 +178,7 @@
         <el-button v-if="dialogStatus !='create' && showOrgDetailFlag == false" @click="showOrgDetailFlag = true">{{ $t('table.showDetail') }}</el-button>
         <el-button v-if="dialogStatus !='create' && showOrgDetailFlag == true" @click="showOrgDetailFlag = false">{{ $t('table.closeDetail') }}</el-button>
         <el-button @click="updateStaffFormVisible = false">{{ $t('table.cancel') }}</el-button>
-        <el-button v-if="this.$store.state.user.role == 0" type="primary" @click="dialogStatus==='create'?CreateStaff(tempOrgName, tempOrgId):UpdateStaff()">{{ $t('table.confirm') }}</el-button>
+        <el-button v-if="this.$store.state.user.role == 0" type="primary" @click="dialogStatus==='create'?CreateStaff(tempOrgName, tempOrgId):UpdateStaff(tempOrgName, tempOrgId)">{{ $t('table.confirm') }}</el-button>
       </div>
       <el-collapse-transition>
         <div v-show="showOrgDetailFlag">
