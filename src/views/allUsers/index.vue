@@ -22,19 +22,6 @@
           <span class="link-type" @click="handleUpdateUser(scope.row)">{{ scope.row.email }}</span>
         </template>
       </el-table-column>
-      <!-- 临时加一列orgId -->
-      <!-- <el-table-column :label="$t('table.ID')" width="150px" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row._id }}</span>
-        </template>
-      </el-table-column> -->
-      <!-- 加完了 -->
-      <!-- 创建人暂时隐藏 -->
-      <el-table-column :label="$t('table.creater')" width="150px" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.createdBy }}</span>
-        </template>
-      </el-table-column>
       <el-table-column :label="$t('table.phone')" align="center" width="95">
         <template slot-scope="scope">
           <span>{{ scope.row.phone }}</span>
@@ -45,14 +32,14 @@
           <span>{{ scope.row.fullname }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('table.organization')" align="center" width="95">
+      <el-table-column :label="$t('table.organizationName')" align="center" width="95">
         <template slot-scope="scope">
-          <span>{{ scope.row.organizationId }}</span>
+          <span>{{ scope.row.organizationName }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('table.customer')" align="center" width="95">
+      <el-table-column :label="$t('table.customerName')" align="center" width="95">
         <template slot-scope="scope">
-          <span>{{ scope.row.customerId }}</span>
+          <span>{{ scope.row.customerName }}</span>
         </template>
       </el-table-column>
       <el-table-column :label="$t('table.actions')" align="center" width="220" class-name="small-padding fixed-width">
@@ -79,7 +66,7 @@
     <el-dialog :title= "updateStaffTitle" :visible.sync="updateStaffFormVisible">
       <el-form ref="updateStaffForm" :rules="rules" :model="temp" label-position="left" label-width="90px" style="width: 400px; margin-left:50px;">
         <el-form-item :label="$t('table.email')" prop="email">
-          <el-input v-model="temp.email" :disabled="!(this.$store.state.user.role == 0)" clearable autofocus/>
+          <el-input v-model="temp.email" :disabled="true" clearable autofocus/>
         </el-form-item>
         <el-form-item :label="$t('table.password')" prop="password">
           <el-input v-model="temp.password" :disabled="!(this.$store.state.user.role == 0)" type="password" clearable/>
@@ -106,8 +93,20 @@
             <el-form-item :label="$t('table.creater')" prop="createdBy" >
               <el-input v-model="temp.createdBy" :disabled="true"/>
             </el-form-item>
-            <el-form-item :label="$t('table.organizationId')" prop="organizationId" >
+            <el-form-item :label="$t('table.createdName')" prop="createdName" >
+              <el-input v-model="temp.createdName" :disabled="true"/>
+            </el-form-item>
+            <el-form-item v-if="temp.organizationId" :label="$t('table.organizationId')" prop="organizationId" >
               <el-input v-model="temp.organizationId" :disabled="true"/>
+            </el-form-item>
+            <el-form-item v-if="temp.organizationName" :label="$t('table.organizationName')" prop="organizationName" >
+              <el-input v-model="temp.organizationName" :disabled="true"/>
+            </el-form-item>
+            <el-form-item v-if="temp.customerId" :label="$t('table.customerId')" prop="customerId" >
+              <el-input v-model="temp.customerId" :disabled="true"/>
+            </el-form-item>
+            <el-form-item v-if="temp.customerName" :label="$t('table.customerName')" prop="customerName" >
+              <el-input v-model="temp.customerName" :disabled="true"/>
             </el-form-item>
             <el-form-item :label="$t('table.createdAt')" prop="createdAt" >
               <el-input v-model="temp.createdAt" :disabled="true"/>

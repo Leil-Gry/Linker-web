@@ -8,7 +8,7 @@
 
       <template v-if="device!=='mobile'">
         <error-log class="errLog-container right-menu-item"/>
-        <h4 class="right-menu-item welcome">欢迎 {{ this.$store.state.user.roles+':'+this.$store.state.user.email }}</h4>
+        <h4 class="right-menu-item welcome">欢迎 {{ this.$store.state.user.roles+':'+this.$store.state.user.email+','+this.$store.state.user.fullname }}</h4>
         <!-- <el-tooltip :content="$t('navbar.screenfull')" effect="dark" placement="bottom">
           <screenfull class="screenfull right-menu-item"/>
         </el-tooltip> -->

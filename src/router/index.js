@@ -205,7 +205,7 @@ export const asyncRouterMap = [
     path: '/customers',
     component: Layout,
     redirect: 'noredirect',
-    meta: { roles: ['webAdmin', 'organizationAdmin', 'customerAdmin', 'organizationStaff', 'customerStaff'] },
+    meta: { roles: ['webAdmin', 'organizationAdmin', 'organizationStaff'] },
     children: [
       {
         path: 'index',

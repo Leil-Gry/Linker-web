@@ -43,11 +43,20 @@ const user = {
     SET_CREATEDBY: (state, createdBy) => {
       state.createdBy = createdBy
     },
+    SET_CREATEDNAME: (state, createdName) => {
+      state.createdName = createdName
+    },
     SET_ORGANIZATIONID: (state, organizationId) => {
       state.organizationId = organizationId
     },
+    SET_ORGANIZATIONNAME: (state, organizationName) => {
+      state.organizationName = organizationName
+    },
     SET_CUSTOMERID: (state, customerId) => {
       state.customerId = customerId
+    },
+    SET_CUSTOMERNAME: (state, customerName) => {
+      state.customerName = customerName
     },
     SET_ORGCOUNT: (state, orgCount) => {
       state.orgCount = orgCount
@@ -130,21 +139,24 @@ const user = {
               data.deviceCount = 0
             }
             // 拉取到信息后设置state
-            commit('SET_ROLES', roles)
             commit('SET_EMAIL', data.email)
             commit('SET_TYPE', data.type)// 0:Admin,1:Organization,2:customer
             commit('SET_ROLE', data.role)// 0:Admin,1:user
             commit('SET_PHONE', data.phone)
             commit('SET_FULLNAME', data.fullname)
             commit('SET_CREATEDBY', data.createdBy)
+            commit('SET_CREATEDNAME', data.createdName)
             commit('SET_ORGANIZATIONID', data.organizationId)
+            commit('SET_ORGANIZATIONNAME', data.organizationName)
             commit('SET_CUSTOMERID', data.customerId)
+            commit('SET_CUSTOMERNAME', data.customerName)
             commit('SET_ORGCOUNT', data.orgCount)
             commit('SET_CUSTOMERCOUNT', data.customerCount)
             commit('SET_PRODUCTCOUNT', data.productCount)
             commit('SET_DEVICECOUNT', data.deviceCount)
             commit('SET_TOKEN', getCookie('authToken'))
             commit('SET__ID', data._id)
+            commit('SET_ROLES', roles)
             resolve(roles)
           }
         }).catch(error => {

@@ -31,6 +31,14 @@ export function getCustomerList(orgId, authorization) { // 得到org下面的cus
   })
 }
 
+export function getAllCustomerList(authorization) { // 得到所有customer，仅限webadmin
+  return request({
+    url: '/customer',
+    method: 'get',
+    headers: { authorization }
+  })
+}
+
 export function createCustomerStaff(authorization, data) {
   return request({
     url: '/user',

@@ -22,22 +22,14 @@
           <span class="link-type" @click="handleUpdate(scope.row)">{{ scope.row.name }}</span>
         </template>
       </el-table-column>
-      <!-- 临时加一列orgId -->
-      <!-- <el-table-column :label="$t('table.ID')" width="150px" align="center">
+      <el-table-column :label="$t('table.createdName')" width="150px" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row._id }}</span>
-        </template>
-      </el-table-column> -->
-      <!-- 加完了 -->
-      <!-- 创建人暂时隐藏 -->
-      <el-table-column :label="$t('table.creater')" width="150px" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.createdBy }}</span>
+          <span>{{ scope.row.createdName }}</span>
         </template>
       </el-table-column>
       <el-table-column :label="$t('table.organization')" width="150px" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.organizationId }}</span>
+          <span>{{ scope.row.organizationName }}</span>
         </template>
       </el-table-column>
       <el-table-column :label="$t('table.countStaff')" align="center" width="95" @click="handleStaffList(scope.row.name, scope.row._id)">
@@ -76,7 +68,7 @@
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="90px" style="width: 400px; margin-left:50px;">
         <el-form-item :label="$t('table.customerName')" prop="name">
-          <el-input v-model="temp.name" :disabled="!(this.$store.state.user.role == 0)" clearable autofocus/>
+          <el-input v-model="temp.name" :disabled="!(this.$store.state.user.role == 0) || dialogStatus !='create' " clearable autofocus/>
         </el-form-item>
         <el-form-item :label="$t('table.description')">
           <el-input :autosize="{ minRows: 2, maxRows: 4}" v-model="temp.description" :disabled="!(this.$store.state.user.role == 0)" type="textarea"/>
@@ -92,8 +84,8 @@
             <el-option
               v-for="item in organizationOptions"
               :key="item.value"
-              :label="item.label"
-              :value="item.value"/>
+              :label="item.organizationName"
+              :value="item.organizationId"/>
           </el-select>
         </el-form-item>
         <el-form-item :label="$t('table.phone')" prop="phone">
@@ -104,7 +96,7 @@
         <el-button v-if="dialogStatus !='create' && showCusDetailFlag == false" @click="showCusDetailFlag = true">{{ $t('table.showDetail') }}</el-button>
         <el-button v-if="dialogStatus !='create' && showCusDetailFlag == true" @click="showCusDetailFlag = false">{{ $t('table.closeDetail') }}</el-button>
         <el-button @click="dialogFormVisible = false">{{ $t('table.cancel') }}</el-button>
-        <el-button v-if="this.$store.state.user.role == 0" type="primary" @click="dialogStatus==='create'?CreateCustomer():UpdateOrganization()">{{ $t('table.confirm') }}</el-button>
+        <el-button v-if="this.$store.state.user.role == 0" type="primary" @click="dialogStatus==='create'?CreateCustomer():UpdateCustomer()">{{ $t('table.confirm') }}</el-button>
       </div>
       <el-collapse-transition>
         <div v-show="showCusDetailFlag">
@@ -115,8 +107,14 @@
             <el-form-item :label="$t('table.creater')" prop="createdBy" >
               <el-input v-model="temp.createdBy" :disabled="true"/>
             </el-form-item>
+            <el-form-item :label="$t('table.createdName')" prop="createdName" >
+              <el-input v-model="temp.createdName" :disabled="true"/>
+            </el-form-item>
             <el-form-item :label="$t('table.organization')" prop="organization" >
               <el-input v-model="temp.organizationId" :disabled="true"/>
+            </el-form-item>
+            <el-form-item :label="$t('table.organizationName')" prop="organizationName" >
+              <el-input v-model="temp.organizationName" :disabled="true"/>
             </el-form-item>
             <el-form-item :label="$t('table.memberCount')" prop="memberCount" >
               <el-input v-model="temp.memberCount" :disabled="true"/>
@@ -154,13 +152,13 @@
         </el-table-column>
         <el-table-column v-if="this.$store.state.user.role == 0" :label="$t('table.actions')" align="center" width="220" class-name="small-padding fixed-width">
           <template slot-scope="scope">
-            <el-button v-if="scope.row.role == '0'" @click="handleSetStaff(tempOrgName, tempOrgId,scope.row)">{{ $t('table.isAdmin') }}
+            <el-button v-if="scope.row.role == '0'" @click="handleSetStaff(tempCustomerName, tempCustomerId,scope.row)">{{ $t('table.isAdmin') }}
             </el-button>
             <!--//已经是管理员，文字显示取消管理员-->
-            <el-button v-if="scope.row.role == '1'" type="danger" @click="handleSetAdmin(tempOrgName, tempOrgId,scope.row)">{{ $t('table.notAdmin') }}
+            <el-button v-if="scope.row.role == '1'" type="danger" @click="handleSetAdmin(tempCustomerName, tempCustomerId,scope.row)">{{ $t('table.notAdmin') }}
             </el-button>
             <!--//不是管理员，文字显示设置管理员-->
-            <el-button type="danger" icon="el-icon-delete" @click="DeleteOrgStaff(tempOrgName, tempOrgId, scope.row)"/>
+            <el-button type="danger" icon="el-icon-delete" @click="DeleteOrgStaff(tempCustomerName, tempCustomerId, scope.row)"/>
           </template>
         </el-table-column>
       </el-table>
@@ -189,7 +187,7 @@
         <el-button v-if="dialogStatus !='create' && showCusDetailFlag == false" @click="showCusDetailFlag = true">{{ $t('table.showDetail') }}</el-button>
         <el-button v-if="dialogStatus !='create' && showCusDetailFlag == true" @click="showCusDetailFlag = false">{{ $t('table.closeDetail') }}</el-button>
         <el-button @click="updateStaffFormVisible = false">{{ $t('table.cancel') }}</el-button>
-        <el-button v-if="this.$store.state.user.role == 0" type="primary" @click="dialogStatus==='create'?CreateStaff(tempOrgName, tempOrgId):UpdateStaff(tempOrgName, tempOrgId)">{{ $t('table.confirm') }}</el-button>
+        <el-button v-if="this.$store.state.user.role == 0" type="primary" @click="dialogStatus==='create'?CreateStaff(tempCustomerName, tempCustomerId):UpdateStaff(tempCustomerName, tempCustomerId)">{{ $t('table.confirm') }}</el-button>
       </div>
       <el-collapse-transition>
         <div v-show="showCusDetailFlag">
@@ -200,8 +198,14 @@
             <el-form-item :label="$t('table.creater')" prop="createdBy" >
               <el-input v-model="temp.createdBy" :disabled="true"/>
             </el-form-item>
-            <el-form-item :label="$t('table.organizationId')" prop="organizationId" >
-              <el-input v-model="temp.organizationId" :disabled="true"/>
+            <el-form-item :label="$t('table.createdName')" prop="createdName" >
+              <el-input v-model="temp.createdName" :disabled="true"/>
+            </el-form-item>
+            <el-form-item :label="$t('table.customerId')" prop="customerId" >
+              <el-input v-model="temp.customerId" :disabled="true"/>
+            </el-form-item>
+            <el-form-item :label="$t('table.customerName')" prop="customerName" >
+              <el-input v-model="temp.customerName" :disabled="true"/>
             </el-form-item>
             <el-form-item :label="$t('table.createdAt')" prop="createdAt" >
               <el-input v-model="temp.createdAt" :disabled="true"/>
@@ -215,7 +219,7 @@
 </template>
 
 <script>
-import { getCustomerList, deleteCustomer, updateCustomer, createCustomer, getCustomerStaffList, createCustomerStaff, updateCustomerStaff, deleteCustomerStaff } from '@/api/customer'
+import { getCustomerList, deleteCustomer, updateCustomer, createCustomer, getCustomerStaffList, getAllCustomerList, createCustomerStaff, updateCustomerStaff, deleteCustomerStaff } from '@/api/customer'
 import waves from '@/directive/waves' // 水波纹指令
 import { parseTime } from '@/utils'
 export default {
@@ -225,11 +229,16 @@ export default {
   },
   data() {
     return {
-      organizationOptions: [],
+      organizationOptions: [
+        {
+          organizationName: 'name',
+          organizationId: '5c1dd642e0b099023a4b4fc0'
+        }
+      ],
       tableKey: 0,
       listLoading: true,
-      tempId: '', // 点某条org的成员时，记录一下，添加成员的时候使用
-      tempCusName: '',
+      tempCustomerId: '', // 点某条org的成员时，记录一下，添加成员的时候使用
+      tempCustomerName: '',
       showCusDetailFlag: false,
       temp: {
         email: '',
@@ -270,45 +279,89 @@ export default {
   },
   methods: {
     GetCustomerList(orgId) {
-      this.listLoading = true
-      // console.log(this.$store.state.user.token)
-      getCustomerList(orgId, this.$store.state.user.token).then(response => {
-        if (response.data.status == '200') {
-          if (response.data.data == null) {
-            this.customerListData = this.nullList
+      if (orgId) {
+        this.listLoading = true
+        getCustomerList(orgId, this.$store.state.user.token).then(response => { // 如果url中有orgID，则优先根据查询id
+          if (response.data.status == '200') {
+            if (response.data.data == null) {
+              this.customerListData = this.nullList
+            } else {
+              this.customerListData = response.data.data
+            }
+            this.listLoading = false
           } else {
-            this.customerListData = response.data.data
+            this.$message.error({
+              message: response.data.msg
+            })
+            this.listLoading = false
           }
-          this.listLoading = false
-        } else {
-          this.$message.error({
-            message: response.data.msg
+        })
+      } else {
+        if (this.$store.state.user.roles == 'webAdmin') { // url没有id但是是webadmin，查所有
+          this.listLoading = true
+          getAllCustomerList(this.$store.state.user.token).then(response => {
+            if (response.data.status == '200') {
+              if (response.data.data == null) {
+                this.customerListData = this.nullList
+              } else {
+                this.customerListData = response.data.data
+              }
+              this.listLoading = false
+            } else {
+              this.$message.error({
+                message: response.data.msg
+              })
+              this.listLoading = false
+            }
           })
-          this.listLoading = false
+        } else { // 没有id 不是webadmin，查自己所属的org
+          this.listLoading = true
+          getCustomerList(this.$store.state.user.organizationId, this.$store.state.user.token).then(response => {
+            if (response.data.status == '200') {
+              if (response.data.data == null) {
+                this.customerListData = this.nullList
+              } else {
+                this.customerListData = response.data.data
+              }
+              this.listLoading = false
+            } else {
+              this.$message.error({
+                message: response.data.msg
+              })
+              this.listLoading = false
+            }
+          })
         }
-      })
+      }
     },
     DeleteCustomer(row) {
-      this.$confirm('将删除该客户, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        deleteCustomer(this.$store.state.user.token, row._id).then(response => {
-          this.listLoading = true
-          this.$message({
-            message: response.data.msg,
-            type: 'success'
+      if (row.memberCount > 0) {
+        this.$alert('请删除所有成员后再删除组织?', '拒绝删除', {
+          cancelButtonText: '关闭',
+          type: 'info'
+        })
+      } else {
+        this.$confirm('将删除该客户, 是否继续?', '删除', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          deleteCustomer(this.$store.state.user.token, row._id).then(response => {
+            this.listLoading = true
+            this.$message({
+              message: response.data.msg,
+              type: 'success'
+            })
+            this.listLoading = false
+            this.GetCustomerList(this.$route.query.organizationID)
           })
-          this.listLoading = false
-          this.GetCustomerList(this.$route.query.organizationID)
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '未删除'
+          })
         })
-      }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: '未删除'
-        })
-      })
+      }
     },
     resetTemp() {
       this.temp = {
@@ -328,15 +381,22 @@ export default {
       this.showCusDetailFlag = false
     },
     handleCreate() {
-      this.resetTemp()
-      this.dialogStatus = 'create'
-      this.dialogFormVisible = true
-      this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
-      })
+      if (this.$store.state.user.roles != 'organizationAdmin') {
+        this.$alert('请使用组织管理员帐号添加客户', '拒绝添加', {
+          cancelButtonText: '关闭',
+          type: 'info'
+        })
+      } else {
+        this.resetTemp()
+        this.dialogStatus = 'create'
+        this.dialogFormVisible = true
+        this.$nextTick(() => {
+          this.$refs['dataForm'].clearValidate()
+        })
+      }
     },
     CreateCustomer() {
-      this.$confirm('将创建该组织, 是否继续?', '提示', {
+      this.$confirm('将创建该客户, 是否继续?', '创建', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -344,10 +404,13 @@ export default {
         this.$refs['dataForm'].validate((valid) => {
           if (valid) {
             this.temp.createdBy = this.$store.state.user._id// 创建人
+            this.temp.createdName = this.$store.state.user.fullname// 创建人
+            this.temp.organizationId = this.$store.state.user.organizationId// 所属组织
+            this.temp.organizationName = this.$store.state.user.organizationName// 所属组织
             createCustomer(this.$store.state.user.token, this.temp).then((response) => {
               if (response.data.status == '200') {
                 this.dialogFormVisible = false
-                this.GetOrganizationList()
+                this.GetCustomerList(this.$route.query.organizationID)
                 this.$notify({
                   title: response.data.msg,
                   type: 'success',
@@ -377,8 +440,8 @@ export default {
         this.$refs['dataForm'].clearValidate()
       })
     },
-    UpdateOrganization() {
-      this.$confirm('将修改该组织, 是否继续?', '提示', {
+    UpdateCustomer() {
+      this.$confirm('将修改该客户, 是否继续?', '修改', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -411,17 +474,17 @@ export default {
         })
       })
     },
-    handleStaffList(orgName, orgId) {
-      this.staffListTitle = '您正在管理组织： ' + orgName + '  的成员：'
+    handleStaffList(customerName, customerId) {
+      this.staffListTitle = '您正在管理客户： ' + customerName + '  的成员：'
       this.dialogStatus = 'staff'
       this.staffFormVisible = true
-      this.tempOrgId = orgId // 临时存到这里
-      this.tempOrgName = orgName
+      this.tempCustomerId = customerId // 临时存到这里
+      this.tempCustomerName = customerName
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
       this.listLoading = true
-      getCustomerStaffList(this.$store.state.user.token, orgId).then((response) => {
+      getCustomerStaffList(this.$store.state.user.token, customerId).then((response) => {
         if (response.data.status == '200') {
           if (response.data.data == null) {
             this.staffListData = this.nullList
@@ -456,22 +519,24 @@ export default {
         this.$refs['updateStaffForm'].clearValidate()
       })
     },
-    CreateStaff(orgName, orgId) {
+    CreateStaff(customerName, customerId) {
       this.$refs['updateStaffForm'].validate((valid) => {
         if (valid) {
-          this.$confirm('将添加该成员, 是否继续?', '提示', {
+          this.$confirm('将添加该成员, 是否继续?', '添加', {
             confirmButtonText: '确定',
             cancelButtonText: '取消',
             type: 'warning'
           }).then(() => {
             this.temp.createdBy = this.$store.state.user._id// 创建人
-            this.temp.organizationId = orgId // 创建的user属于传进来的orgId
+            this.temp.createdName = this.$store.state.user.fullname// 创建人
+            this.temp.customerId = customerId // 创建的user属于传进来的customerId
+            this.temp.customerName = customerName
             this.temp.role = 1
-            this.temp.type = 1// organization staff
+            this.temp.type = 2// customer staff
             createCustomerStaff(this.$store.state.user.token, this.temp).then((response) => {
               if (response.data.status == '200') {
                 this.updateStaffFormVisible = false
-                this.handleStaffList(orgName, orgId)// 刷新该org的成员列表
+                this.handleStaffList(customerName, customerId)// 刷新该customer的成员列表
                 this.GetCustomerList(this.$route.query.organizationID)
                 this.$notify({
                   title: response.data.msg,
@@ -494,10 +559,10 @@ export default {
         }
       })
     },
-    UpdateStaff(orgName, orgId) {
+    UpdateStaff(customerName, customerId) {
       this.$refs['updateStaffForm'].validate((valid) => {
         if (valid) {
-          this.$confirm('将修改该成员信息, 是否继续?', '提示', {
+          this.$confirm('将修改该成员信息, 是否继续?', '修改', {
             confirmButtonText: '确定',
             cancelButtonText: '取消',
             type: 'warning'
@@ -506,7 +571,7 @@ export default {
             updateCustomerStaff(this.$store.state.user.token, this.temp._id, tempData).then((response) => {
               if (response.data.status == '200') { // 返回type是success时，关弹窗，改列表
                 this.updateStaffFormVisible = false
-                this.handleStaffList(orgName, orgId)// 刷新该org的成员列表
+                this.handleStaffList(customerName, customerId)// 刷新该customer的成员列表
                 this.$notify({
                   title: response.data.msg,
                   type: 'success',
@@ -528,8 +593,8 @@ export default {
         }
       })
     },
-    handleSetAdmin(orgName, orgId, row) { // 更新成员role为0
-      this.$confirm('设置该成员为管理员, 是否继续?', '提示', {
+    handleSetAdmin(customerName, customerId, row) { // 更新成员role为0
+      this.$confirm('设置该成员为管理员, 是否继续?', '设为管理员', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -539,7 +604,7 @@ export default {
         const tempData = this.temp
         updateCustomerStaff(this.$store.state.user.token, this.temp._id, tempData).then((response) => {
           if (response.data.status == '200') { // 返回type是success时，关弹窗，改列表
-            this.handleStaffList(orgName, orgId)// 刷新该org的成员列表
+            this.handleStaffList(customerName, customerId)// 刷新该customer的成员列表
             this.$notify({
               title: response.data.msg,
               type: 'success',
@@ -559,8 +624,8 @@ export default {
         })
       })
     },
-    handleSetStaff(orgName, orgId, row) { // 更新成员role为1
-      this.$confirm('取消该成员的管理员权限, 是否继续?', '提示', {
+    handleSetStaff(customerName, customerId, row) { // 更新成员role为1
+      this.$confirm('取消该成员的管理员权限, 是否继续?', '取消管理员', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -570,7 +635,7 @@ export default {
         const tempData = this.temp
         updateCustomerStaff(this.$store.state.user.token, this.temp._id, tempData).then((response) => {
           if (response.data.status == '200') { // 返回type是success时，关弹窗，改列表
-            this.handleStaffList(orgName, orgId)// 刷新该org的成员列表
+            this.handleStaffList(customerName, customerId)// 刷新该customer的成员列表
             this.$notify({
               title: response.data.msg,
               type: 'success',
@@ -590,8 +655,8 @@ export default {
         })
       })
     },
-    DeleteCustomerStaff(orgName, orgId, row) {
-      this.$confirm('将删除该成员, 是否继续?', '提示', {
+    DeleteCustomerStaff(customerName, customerId, row) {
+      this.$confirm('将删除该成员, 是否继续?', '删除', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -603,7 +668,7 @@ export default {
             type: 'success'
           })
           this.listLoading = false
-          this.handleStaffList(orgName, orgId)// 刷新该org的成员列表
+          this.handleStaffList(customerName, customerId)// 刷新该customer的成员列表
           this.GetOrganizationList()
         })
       }).catch(() => {
@@ -617,7 +682,7 @@ export default {
       import('@/vendor/Export2Excel').then(excel => {
         const tHeader = ['name', 'createdBy']
         const filterVal = ['name', 'createdBy']
-        const list = this.organizationListData
+        const list = this.customerListData
         const data = this.formatJson(filterVal, list)
         excel.export_json_to_excel({
           header: tHeader,

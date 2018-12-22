@@ -1,5 +1,5 @@
 <template>
-  <el-row :gutter="40" class="panel-group">
+  <el-row :gutter="30" class="panel-group">
     <el-col v-show="showOrgButton()" :xs="12" :sm="12" :lg="6" class="card-panel-col">
       <div class="card-panel" @click="jumpRouter('organizations')">
         <div class="card-panel-icon-wrapper">
@@ -7,19 +7,21 @@
         </div>
         <div class="card-panel-description">
           <div class="card-panel-text">{{ $t('panel.organizations') }}</div>
-          <count-to :start-val="0" :end-val= "this.$store.state.user.orgCount" :duration="2600" class="card-panel-num"/>
+          <!-- <count-to v-if="this.$store.state.user.roles != 'webAdmin'" :start-val="0" :end-val= "this.$store.state.user.orgCount" :duration="2600" class="card-panel-num"/> -->
+          <div class="card-panel-subText">点击查看</div>
         </div>
       </div>
     </el-col>
 
     <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
-      <div class="card-panel" @click="jumpRouter('Customers')">
+      <div class="card-panel" @click="jumpRouter('customers')">
         <div class="card-panel-icon-wrapper">
           <svg-icon icon-class="客户" class-name="card-panel-icon" />
         </div>
         <div class="card-panel-description">
           <div class="card-panel-text">{{ $t('panel.customers') }}</div>
-          <count-to :start-val="0" :end-val= "this.$store.state.user.customerCount" :duration="3200" class="card-panel-num"/>
+          <!-- <count-to v-if="this.$store.state.user.roles != 'webAdmin'" :start-val="0" :end-val= "this.$store.state.user.customerCount" :duration="3200" class="card-panel-num"/> -->
+          <div class="card-panel-subText">点击查看</div>
         </div>
       </div>
     </el-col>
@@ -30,7 +32,8 @@
         </div>
         <div class="card-panel-description">
           <div class="card-panel-text">{{ $t('panel.products') }}</div>
-          <count-to :start-val="0" :end-val= "this.$store.state.user.productCount" :duration="3000" class="card-panel-num"/>
+          <!-- <count-to v-if="this.$store.state.user.roles != 'webAdmin'" :start-val="0" :end-val= "this.$store.state.user.productCount" :duration="3000" class="card-panel-num"/> -->
+          <div class="card-panel-subText">点击查看</div>
         </div>
       </div>
     </el-col>
@@ -41,7 +44,8 @@
         </div>
         <div class="card-panel-description">
           <div class="card-panel-text">{{ $t('panel.devices') }}</div>
-          <count-to :start-val="0" :end-val= "this.$store.state.user.deviceCount" :duration="3600" class="card-panel-num"/>
+          <!-- <count-to v-if="this.$store.state.user.roles != 'webAdmin'" :start-val="0" :end-val= "this.$store.state.user.deviceCount" :duration="3600" class="card-panel-num"/> -->
+          <div class="card-panel-subText">点击查看</div>
         </div>
       </div>
     </el-col>
@@ -82,6 +86,7 @@ export default {
     margin-bottom: 32px;
   }
   .card-panel {
+    border-radius: 10px;
     height: 108px;
     cursor: pointer;
     font-size: 12px;
@@ -90,11 +95,12 @@ export default {
     color: #666;
     background: #fff;
     box-shadow: 4px 4px 40px rgba(0, 0, 0, .05);
-    border-color: rgba(0, 0, 0, .05);
+    border-color: rgba(39, 38, 38, 0.05);
     &:hover {
       .card-panel-icon-wrapper {
-        color: rgb(86, 174, 224);
+        color: rgb(28, 85, 117);
       }
+
     }
     .card-panel-icon-wrapper {
       float: left;
@@ -113,9 +119,16 @@ export default {
       margin: 26px;
       margin-left: 0px;
       .card-panel-text {
+        text-align: right;
         line-height: 18px;
-        color: rgba(0, 0, 0, 0.45);
+        color:#666;
         font-size: 16px;
+        margin-bottom: 12px;
+      }
+      .card-panel-subText{
+        line-height: 18px;
+        color: darkgray;
+        font-size: 12px;
         margin-bottom: 12px;
       }
       .card-panel-num {
@@ -123,5 +136,8 @@ export default {
       }
     }
   }
+}
+.footer{
+
 }
 </style>

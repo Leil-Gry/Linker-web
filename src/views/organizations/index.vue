@@ -4,7 +4,7 @@
       <!-- TODO -->
       <el-input :placeholder="$t('table.organizationName')" v-model="temp.name" clearable style="width: 200px;" class="filter-item" />
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" >{{ $t('table.search') }}</el-button>
-      <el-button v-if="this.$store.state.user.role == 0" class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">{{ $t('table.add') }}</el-button>
+      <el-button v-if="this.$store.state.user.role == 0" class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">{{ $t('table.createOrganization') }}</el-button>
       <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="document" @click="handleExport">{{ $t('excel.export') }} Excel</el-button>
 
     </div>
@@ -30,9 +30,9 @@
       </el-table-column> -->
       <!-- 加完了 -->
       <!-- 创建人暂时隐藏 -->
-      <el-table-column :label="$t('table.creater')" width="150px" align="center">
+      <el-table-column :label="$t('table.createdName')" width="150px" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.createdBy }}</span>
+          <span>{{ scope.row.createdName }}</span>
         </template>
       </el-table-column>
       <el-table-column :label="$t('table.countStaff')" align="center" width="95" @click="handleStaffList(scope.row.name, scope.row._id)">
@@ -77,7 +77,7 @@
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="90px" style="width: 400px; margin-left:50px;">
         <el-form-item :label="$t('table.organizationName')" prop="name">
-          <el-input v-model="temp.name" :disabled="!(this.$store.state.user.role == 0)" clearable autofocus/>
+          <el-input v-model="temp.name" :disabled="this.$store.state.user.role != 0 || dialogStatus !='create' " clearable autofocus/>
         </el-form-item>
         <el-form-item :label="$t('table.description')">
           <el-input :autosize="{ minRows: 2, maxRows: 4}" v-model="temp.description" :disabled="!(this.$store.state.user.role == 0)" type="textarea"/>
@@ -106,6 +106,9 @@
             </el-form-item>
             <el-form-item :label="$t('table.creater')" prop="createdBy" >
               <el-input v-model="temp.createdBy" :disabled="true"/>
+            </el-form-item>
+            <el-form-item :label="$t('table.createdName')" prop="createdName" >
+              <el-input v-model="temp.createdName" :disabled="true"/>
             </el-form-item>
             <el-form-item :label="$t('table.memberCount')" prop="memberCount" >
               <el-input v-model="temp.memberCount" :disabled="true"/>
@@ -162,7 +165,7 @@
     <el-dialog :title= "updateStaffTitle" :visible.sync="updateStaffFormVisible">
       <el-form ref="updateStaffForm" :rules="rules" :model="temp" label-position="left" label-width="90px" style="width: 400px; margin-left:50px;">
         <el-form-item :label="$t('table.email')" prop="email">
-          <el-input v-model="temp.email" :disabled="!(this.$store.state.user.role == 0)" clearable autofocus/>
+          <el-input v-model="temp.email" :disabled="!(this.$store.state.user.role == 0) || dialogStatus !='create'" clearable autofocus/>
         </el-form-item>
         <el-form-item :label="$t('table.password')" prop="password">
           <el-input v-model="temp.password" :disabled="!(this.$store.state.user.role == 0)" type="password" clearable/>
@@ -189,8 +192,14 @@
             <el-form-item :label="$t('table.creater')" prop="createdBy" >
               <el-input v-model="temp.createdBy" :disabled="true"/>
             </el-form-item>
+            <el-form-item :label="$t('table.createdName')" prop="createdName" >
+              <el-input v-model="temp.createdName" :disabled="true"/>
+            </el-form-item>
             <el-form-item :label="$t('table.organizationId')" prop="organizationId" >
               <el-input v-model="temp.organizationId" :disabled="true"/>
+            </el-form-item>
+            <el-form-item :label="$t('table.organizationName')" prop="organizationName" >
+              <el-input v-model="temp.organizationName" :disabled="true"/>
             </el-form-item>
             <el-form-item :label="$t('table.createdAt')" prop="createdAt" >
               <el-input v-model="temp.createdAt" :disabled="true"/>
@@ -231,7 +240,8 @@ export default {
 
         description: '',
         address: '',
-        contact: ''
+        contact: '',
+        createdName: ''
       },
       dialogFormVisible: false,
       staffFormVisible: false,
@@ -277,26 +287,33 @@ export default {
       })
     },
     DeleteOrganization(row) {
-      this.$confirm('将删除该组织, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        deleteOrganization(this.$store.state.user.token, row._id).then(response => {
-          this.listLoading = true
-          this.$message({
-            message: response.data.msg,
-            type: 'success'
+      if (row.memberCount > 0) {
+        this.$alert('请删除所有成员后再删除组织?', '拒绝删除', {
+          cancelButtonText: '关闭',
+          type: 'info'
+        })
+      } else {
+        this.$confirm('将删除该组织, 是否继续?', '删除', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          deleteOrganization(this.$store.state.user.token, row._id).then(response => {
+            this.listLoading = true
+            this.$message({
+              message: response.data.msg,
+              type: 'success'
+            })
+            this.listLoading = false
+            this.GetOrganizationList()
           })
-          this.listLoading = false
-          this.GetOrganizationList()
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '未删除'
+          })
         })
-      }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: '未删除'
-        })
-      })
+      }
     },
     resetTemp() {
       this.temp = {
@@ -311,7 +328,8 @@ export default {
 
         description: '',
         address: '',
-        contact: ''
+        contact: '',
+        createdName: ''
       }
       this.showOrgDetailFlag = false
     },
@@ -324,7 +342,7 @@ export default {
       })
     },
     CreateOrganization() {
-      this.$confirm('将创建该组织, 是否继续?', '提示', {
+      this.$confirm('将创建该组织, 是否继续?', '创建', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -332,6 +350,7 @@ export default {
         this.$refs['dataForm'].validate((valid) => {
           if (valid) {
             this.temp.createdBy = this.$store.state.user._id// 创建人
+            this.temp.createdName = this.$store.state.user.fullname// 创建人全名
             createOrganization(this.$store.state.user.token, this.temp).then((response) => {
               if (response.data.status == '200') {
                 this.dialogFormVisible = false
@@ -366,7 +385,7 @@ export default {
       })
     },
     UpdateOrganization() {
-      this.$confirm('将修改该组织, 是否继续?', '提示', {
+      this.$confirm('将修改该组织, 是否继续?', '修改', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -447,13 +466,15 @@ export default {
     CreateStaff(orgName, orgId) {
       this.$refs['updateStaffForm'].validate((valid) => {
         if (valid) {
-          this.$confirm('将添加该成员, 是否继续?', '提示', {
+          this.$confirm('将添加该成员, 是否继续?', '添加', {
             confirmButtonText: '确定',
             cancelButtonText: '取消',
             type: 'warning'
           }).then(() => {
             this.temp.createdBy = this.$store.state.user._id// 创建人
+            this.temp.createdName = this.$store.state.user.fullname
             this.temp.organizationId = orgId // 创建的user属于传进来的orgId
+            this.temp.organizationName = orgName
             this.temp.role = 1
             this.temp.type = 1// organization staff
             createOrgStaff(this.$store.state.user.token, this.temp).then((response) => {
@@ -485,7 +506,7 @@ export default {
     UpdateStaff(orgName, orgId) {
       this.$refs['updateStaffForm'].validate((valid) => {
         if (valid) {
-          this.$confirm('将修改该成员信息, 是否继续?', '提示', {
+          this.$confirm('将修改该成员信息, 是否继续?', '修改', {
             confirmButtonText: '确定',
             cancelButtonText: '取消',
             type: 'warning'
@@ -517,7 +538,7 @@ export default {
       })
     },
     handleSetAdmin(orgName, orgId, row) { // 更新成员role为0
-      this.$confirm('设置该成员为管理员, 是否继续?', '提示', {
+      this.$confirm('设置该成员为管理员, 是否继续?', '设置管理员', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -548,7 +569,7 @@ export default {
       })
     },
     handleSetStaff(orgName, orgId, row) { // 更新成员role为1
-      this.$confirm('取消该成员的管理员权限, 是否继续?', '提示', {
+      this.$confirm('取消该成员的管理员权限, 是否继续?', '取消管理员', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -579,7 +600,7 @@ export default {
       })
     },
     DeleteOrgStaff(orgName, orgId, row) {
-      this.$confirm('将删除该成员, 是否继续?', '提示', {
+      this.$confirm('将删除该成员, 是否继续?', '删除', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
