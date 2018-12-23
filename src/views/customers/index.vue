@@ -34,14 +34,14 @@
       </el-table-column>
       <el-table-column :label="$t('table.countStaff')" align="center" width="95" @click="handleStaffList(scope.row.name, scope.row._id)">
         <template slot-scope="scope">
-          <span v-if="scope.row.memberCount" class="link-type" @click="handleStaffList(scope.row.name, scope.row._id)">{{ scope.row.memberCount }}</span>
-          <span v-else class="link-type" @click="handleStaffList(scope.row.name, scope.row._id)">0</span>
+          <span v-if="scope.row.memberCount" class="link-type" @click="handleStaffList(scope.row.name, scope.row._id, scope.row.organizationId, scope.row.organizationName)">{{ scope.row.memberCount }}</span>
+          <span v-else class="link-type" @click="handleStaffList(scope.row.name, scope.row._id, scope.row.organizationId, scope.row.organizationName)">0</span>
         </template>
       </el-table-column>
       <el-table-column :label="$t('table.countProducts')" align="center" width="95">
         <template slot-scope="scope">
-          <span v-if="scope.row.productCount" class="link-type" @click="jumpRouter('products','?organizationID='+scope.row._id)">{{ scope.row.productCount }}</span>
-          <span v-else class="link-type" @click="jumpRouter('products','?organizationID='+scope.row._id)">0</span>
+          <span v-if="scope.row.productCount" class="link-type" @click="jumpRouter('products','?organizationID='+scope.row.organizationId+'&customerID='+scope.row._id)">{{ scope.row.productCount }}</span>
+          <span v-else class="link-type" @click="jumpRouter('products','?organizationID='+scope.row.organizationId+'&customerID='+scope.row._id)">0</span>
         </template>
       </el-table-column>
       <el-table-column :label="$t('table.countDevices')" align="center" width="95">
@@ -220,6 +220,7 @@
 
 <script>
 import { getCustomerList, deleteCustomer, updateCustomer, createCustomer, getCustomerStaffList, getAllCustomerList, createCustomerStaff, updateCustomerStaff, deleteCustomerStaff } from '@/api/customer'
+import { getUserByEmail } from '@/api/search'
 import waves from '@/directive/waves' // 水波纹指令
 import { parseTime } from '@/utils'
 export default {
@@ -239,6 +240,8 @@ export default {
       listLoading: true,
       tempCustomerId: '', // 点某条org的成员时，记录一下，添加成员的时候使用
       tempCustomerName: '',
+      tempOrgName: '',
+      tempOrgId: '',
       showCusDetailFlag: false,
       temp: {
         email: '',
@@ -474,12 +477,14 @@ export default {
         })
       })
     },
-    handleStaffList(customerName, customerId) {
+    handleStaffList(customerName, customerId, organizationId, organizationName) {
       this.staffListTitle = '您正在管理客户： ' + customerName + '  的成员：'
       this.dialogStatus = 'staff'
       this.staffFormVisible = true
       this.tempCustomerId = customerId // 临时存到这里
       this.tempCustomerName = customerName
+      this.tempOrgId = organizationId
+      this.tempOrgName = organizationName
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
@@ -520,41 +525,52 @@ export default {
       })
     },
     CreateStaff(customerName, customerId) {
-      this.$refs['updateStaffForm'].validate((valid) => {
-        if (valid) {
-          this.$confirm('将添加该成员, 是否继续?', '添加', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            type: 'warning'
-          }).then(() => {
-            this.temp.createdBy = this.$store.state.user._id// 创建人
-            this.temp.createdName = this.$store.state.user.fullname// 创建人
-            this.temp.customerId = customerId // 创建的user属于传进来的customerId
-            this.temp.customerName = customerName
-            this.temp.role = 1
-            this.temp.type = 2// customer staff
-            createCustomerStaff(this.$store.state.user.token, this.temp).then((response) => {
-              if (response.data.status == '200') {
-                this.updateStaffFormVisible = false
-                this.handleStaffList(customerName, customerId)// 刷新该customer的成员列表
-                this.GetCustomerList(this.$route.query.organizationID)
-                this.$notify({
-                  title: response.data.msg,
-                  type: 'success',
-                  duration: 2000
+      getUserByEmail(this.$store.state.user.token, this.temp.email).then((response) => {
+        if (response.data.msg == 'Success') { // 存在该email
+          this.$alert('该Email已被注册，请重新输入', '拒绝新建', {
+            cancelButtonText: '关闭',
+            type: 'info'
+          })
+        } else {
+          this.$refs['updateStaffForm'].validate((valid) => {
+            if (valid) {
+              this.$confirm('将添加该成员, 是否继续?', '添加', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+              }).then(() => {
+                this.temp.createdBy = this.$store.state.user._id// 创建人
+                this.temp.createdName = this.$store.state.user.fullname// 创建人
+                this.temp.customerId = customerId // 创建的user属于传进来的customerId
+                this.temp.customerName = customerName
+                this.temp.organizationId = this.tempOrgId // 所属组织
+                this.temp.organizationName = this.tempOrgName
+                this.temp.role = 1
+                this.temp.type = 2// customer staff
+                createCustomerStaff(this.$store.state.user.token, this.temp).then((response) => {
+                  if (response.data.status == '200') {
+                    this.updateStaffFormVisible = false
+                    this.handleStaffList(customerName, customerId)// 刷新该customer的成员列表
+                    this.GetCustomerList(this.$route.query.organizationID)
+                    this.$notify({
+                      title: response.data.msg,
+                      type: 'success',
+                      duration: 2000
+                    })
+                  } else {
+                    this.$notify.error({
+                      title: response.data.msg,
+                      duration: 2000
+                    })
+                  }
                 })
-              } else {
-                this.$notify.error({
-                  title: response.data.msg,
-                  duration: 2000
+              }).catch(() => {
+                this.$message({
+                  type: 'info',
+                  message: '未创建'
                 })
-              }
-            })
-          }).catch(() => {
-            this.$message({
-              type: 'info',
-              message: '未创建'
-            })
+              })
+            }
           })
         }
       })

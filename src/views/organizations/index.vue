@@ -214,6 +214,7 @@
 
 <script>
 import { getOrganizationList, deleteOrganization, updateOrganization, createOrganization, getOrgStaffList, createOrgStaff, updateOrgStaff, deleteOrgStaff } from '@/api/organizations'
+import { getUserByEmail } from '@/api/search'
 import waves from '@/directive/waves' // 水波纹指令
 import { parseTime } from '@/utils'
 export default {
@@ -464,41 +465,50 @@ export default {
       })
     },
     CreateStaff(orgName, orgId) {
-      this.$refs['updateStaffForm'].validate((valid) => {
-        if (valid) {
-          this.$confirm('将添加该成员, 是否继续?', '添加', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            type: 'warning'
-          }).then(() => {
-            this.temp.createdBy = this.$store.state.user._id// 创建人
-            this.temp.createdName = this.$store.state.user.fullname
-            this.temp.organizationId = orgId // 创建的user属于传进来的orgId
-            this.temp.organizationName = orgName
-            this.temp.role = 1
-            this.temp.type = 1// organization staff
-            createOrgStaff(this.$store.state.user.token, this.temp).then((response) => {
-              if (response.data.status == '200') {
-                this.updateStaffFormVisible = false
-                this.handleStaffList(orgName, orgId)// 刷新该org的成员列表
-                this.GetOrganizationList()
-                this.$notify({
-                  title: response.data.msg,
-                  type: 'success',
-                  duration: 2000
+      getUserByEmail(this.$store.state.user.token, this.temp.email).then((response) => {
+        if (response.data.msg == 'Success') { // 存在该email
+          this.$alert('该Email已被注册，请重新输入', '拒绝新建', {
+            cancelButtonText: '关闭',
+            type: 'info'
+          })
+        } else {
+          this.$refs['updateStaffForm'].validate((valid) => {
+            if (valid) {
+              this.$confirm('将添加该成员, 是否继续?', '添加', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+              }).then(() => {
+                this.temp.createdBy = this.$store.state.user._id// 创建人
+                this.temp.createdName = this.$store.state.user.fullname
+                this.temp.organizationId = orgId // 创建的user属于传进来的orgId
+                this.temp.organizationName = orgName
+                this.temp.role = 1
+                this.temp.type = 1// organization staff
+                createOrgStaff(this.$store.state.user.token, this.temp).then((response) => {
+                  if (response.data.status == '200') {
+                    this.updateStaffFormVisible = false
+                    this.handleStaffList(orgName, orgId)// 刷新该org的成员列表
+                    this.GetOrganizationList()
+                    this.$notify({
+                      title: response.data.msg,
+                      type: 'success',
+                      duration: 2000
+                    })
+                  } else {
+                    this.$notify.error({
+                      title: response.data.msg,
+                      duration: 2000
+                    })
+                  }
                 })
-              } else {
-                this.$notify.error({
-                  title: response.data.msg,
-                  duration: 2000
+              }).catch(() => {
+                this.$message({
+                  type: 'info',
+                  message: '未创建'
                 })
-              }
-            })
-          }).catch(() => {
-            this.$message({
-              type: 'info',
-              message: '未创建'
-            })
+              })
+            }
           })
         }
       })

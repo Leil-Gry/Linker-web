@@ -13,7 +13,7 @@
       </div>
     </el-col>
 
-    <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
+    <el-col v-show="showCusButton()" :xs="12" :sm="12" :lg="buttonWidth()" class="card-panel-col">
       <div class="card-panel" @click="jumpRouter('customers')">
         <div class="card-panel-icon-wrapper">
           <svg-icon icon-class="客户" class-name="card-panel-icon" />
@@ -25,7 +25,7 @@
         </div>
       </div>
     </el-col>
-    <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
+    <el-col :xs="12" :sm="12" :lg="buttonWidth()" class="card-panel-col">
       <div class="card-panel" @click="jumpRouter('products')">
         <div class="card-panel-icon-wrapper">
           <svg-icon icon-class="产品" class-name="card-panel-icon" />
@@ -37,7 +37,7 @@
         </div>
       </div>
     </el-col>
-    <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
+    <el-col :xs="12" :sm="12" :lg="buttonWidth()" class="card-panel-col">
       <div class="card-panel" @click="jumpRouter('Devices')">
         <div class="card-panel-icon-wrapper">
           <svg-icon icon-class="设备" class-name="card-panel-icon" />
@@ -70,9 +70,21 @@ export default {
       this.$router.push({ path: '/' + url + '/index' })
     },
     showOrgButton() {
-      if (this.$store.state.user.roles == 'webAdmin') {
+      if (this.$store.state.user.roles == 'webAdmin') { // webadmin显示组织按钮
         return true
       } else return false
+    },
+    showCusButton() {
+      if (this.$store.state.user.roles == 'webAdmin' || this.$store.state.user.type == 1) { // webadmin和组织管理员、组织成员显示客户按钮
+        return true
+      } else return false
+    },
+    buttonWidth() {
+      if (this.$store.state.user.roles == 'webAdmin') { // 四个按钮
+        return 6
+      } else if (this.$store.state.user.type == 1) { // 三个按钮
+        return 8
+      } else return 12 // 两个按钮
     }
 
   }
@@ -136,8 +148,5 @@ export default {
       }
     }
   }
-}
-.footer{
-
 }
 </style>

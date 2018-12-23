@@ -58,6 +58,7 @@ export default {
   padding-top: 20px;
   display: inline-block;
   line-height: 200px;
+  width: 300px;
 }
 .roles{
   font-size: 48px;

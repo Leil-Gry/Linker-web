@@ -1,11 +1,12 @@
 <template>
   <div class="app-container">
-    <p>组织：{{this.$route.query.organizationID}}</p>
-    <p>客户：{{this.$route.query.customerID}}的product</p>
     <div class="filter-container">
-      <el-input clearable :placeholder="$t('table.productName')" v-model="listQuery.name" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter"/>
-      <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">{{ $t('table.search') }}</el-button>
-      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">{{ $t('table.add') }}</el-button>
+      <!-- TODO -->
+      <el-input :placeholder="$t('table.productName')" v-model="temp.name" clearable style="width: 200px;" class="filter-item" />
+      <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" >{{ $t('table.search') }}</el-button>
+      <el-button v-if="this.$store.state.user.role == 0" class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">{{ $t('table.add') }}</el-button>
+      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="document" @click="handleExport">{{ $t('excel.export') }} Excel</el-button>
+
     </div>
     <el-table
       v-loading="listLoading"
@@ -22,43 +23,43 @@
       </el-table-column>
       <el-table-column :label="$t('table.customerName')" min-width="150px">
         <template slot-scope="scope">
-          <span >{{ scope.row.customer }}</span>
+          <span >{{ scope.row.customerName }}</span>
         </template>
       </el-table-column>
       <el-table-column :label="$t('table.organizationName')" min-width="150px">
         <template slot-scope="scope">
-          <span >{{ scope.row.organization }}</span>
+          <span >{{ scope.row.organizationName }}</span>
         </template>
       </el-table-column>
       <el-table-column :label="$t('table.countDevices')" align="center" width="95">
         <template slot-scope="scope">
-          <span v-if="scope.row.countDevices" class="link-type" @click="jumpRouter('devices','?organizationID='+scope.row.organizationId+'&customerID='+scope.row.customerId+'&productID='+scope.row.id)">{{ scope.row.countDevices }}</span>
-          <span v-else @click="jumpRouter('devices','?organizationID='+scope.row.organizationId+'&customerID='+scope.row.customerId+'&productID='+scope.row.id)" class="link-type">0</span>
+          <span v-if="scope.row.countDevices" class="link-type" @click="jumpRouter('devices','?organizationID='+scope.row.organizationId+'&customerID='+scope.row.customerId+'&productID='+scope.row._id)">{{ scope.row.countDevices }}</span>
+          <span v-else class="link-type" @click="jumpRouter('devices','?organizationID='+scope.row.organizationId+'&customerID='+scope.row.customerId+'&productID='+scope.row._id)">0</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('table.actions')" align="center" width="230" class-name="small-padding fixed-width">
+      <el-table-column v-if="this.$store.state.user.role == 0" :label="$t('table.actions')" align="center" width="90" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button v-if="scope.row.status =='deleted'" size="mini" @click="handleModifyStatus(scope.row,'draft')">{{ $t('table.draft') }}
-          </el-button>
-          <el-button v-if="scope.row.status =='draft'" size="mini" type="danger" @click="handleModifyStatus(scope.row,'deleted')">{{ $t('table.delete') }}
-          </el-button>
+          <!--删除按钮-->
+          <el-button size="mini" type="danger" icon="el-icon-delete" @click="DeleteProduct(scope.row)"/>
         </template>
       </el-table-column>
     </el-table>
 
+    <!-- 分页 -->
+    <!-- TODO -->
     <div class="pagination-container">
-      <el-pagination v-show="total>0" :current-page="listQuery.page" :page-sizes="[10,20,30, 50]" :page-size="listQuery.limit" :total="total" background layout="total, sizes, prev, pager, next, jumper" @size-change="handleSizeChange" @current-change="handleCurrentChange"/>
+      <el-pagination v-if="productListData.length > 0" :page-sizes="5" :total="productListData.length" background layout="total, prev, pager, next, jumper" />
     </div>
 
     <!--product编辑框-->
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-      <el-form 
-          ref="dataForm" 
-          :rules="rules" 
-          :model="temp" 
-          label-position="left" 
-          label-width="90px" 
-          style="width: 400px; margin-left:50px;">
+      <el-form
+        ref="dataForm"
+        :rules="rules"
+        :model="temp"
+        label-position="left"
+        label-width="90px"
+        style="width: 400px; margin-left:50px;">
         <el-form-item :label="$t('table.productName')" prop="name">
           <el-input v-model="temp.name" clearable autofocus/>
         </el-form-item>
@@ -70,9 +71,8 @@
             <el-option
               v-for="item in organizationOptions"
               :key="item.value"
-              :label="item.label"
-              :value="item.value">
-            </el-option>
+              :label="item.organizationName"
+              :value="item.organizationId"/>
           </el-select>
         </el-form-item>
         <el-form-item :label="$t('table.customer')">
@@ -80,15 +80,14 @@
             <el-option
               v-for="item in customerOptions"
               :key="item.value"
-              :label="item.label"
-              :value="item.value">
-            </el-option>
+              :label="item.customerName"
+              :value="item.customerId"/>
           </el-select>
         </el-form-item>
 
         <!-- 物模型部分开始 -->
         <el-form-item :label="$t('table.specification')">
-           <el-button @click="handleSpecification()">{{ $t('table.editSpecification') }}</el-button>
+          <el-button @click="handleSpecification()">{{ $t('table.editSpecification') }}</el-button>
         </el-form-item>
         <!-- 物模型部分结束 -->
 
@@ -97,21 +96,20 @@
           <el-tag
             v-for="tag in temp.tags"
             :key="tag"
-            closable
             :type="tag.type"
             :disable-transitions="false"
+            closable
             @close="handleClose(tag)">
-            {{tag}}
+            {{ tag }}
           </el-tag>
           <el-input
-            class="input-new-tag"
             v-if="inputVisible"
-            v-model="inputValue"
             ref="saveTagInput"
+            v-model="inputValue"
+            class="input-new-tag"
             size="small"
             @keyup.enter.native="handleInputConfirm"
-            @blur="handleInputConfirm">
-          </el-input>
+            @blur="handleInputConfirm"/>
           <el-button v-else class="button-new-tag" size="mini" @click="showInput">+ New Tag</el-button>
         </el-form-item>
         <!--标签部分结束-->
@@ -125,15 +123,15 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">{{ $t('table.cancel') }}</el-button>
-        <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">{{ $t('table.confirm') }}</el-button>
+        <el-button type="primary" @click="dialogStatus==='create'?CreateProduct():UpdateProduct()">{{ $t('table.confirm') }}</el-button>
       </div>
     </el-dialog>
 
     <!-- 物模型编辑框开始 -->
     <el-dialog :title="specificationDialogTitle" :visible.sync="specificationDialogVisible">
-        <el-table
-        stripe
+      <el-table
         :data="temp.specification"
+        stripe
         style="width: 100%">
         <el-table-column type="expand">
           <template slot-scope="props">
@@ -160,23 +158,20 @@
                 <el-input v-model="props.row.dataType.specs.unitName" clearable/>
               </el-form-item>
               <el-form-item :label="$t('table.specificationDescription')" style="width:100%">
-                <el-input style="width:100%" :autosize="{ minRows: 2, maxRows: 4}" v-model="props.row.description" type="textarea" />
+                <el-input :autosize="{ minRows: 2, maxRows: 4}" v-model="props.row.description" style="width:100%" type="textarea" />
               </el-form-item>
             </el-form>
           </template>
         </el-table-column>
         <el-table-column
           :label="$t('table.specificationIdentifier')"
-          prop="identifier">
-        </el-table-column>
+          prop="identifier"/>
         <el-table-column
           :label="$t('table.specificationName')"
-          prop="name">
-        </el-table-column>
+          prop="name"/>
         <el-table-column
           :label="$t('table.specificationDescription')"
-          prop="description">
-        </el-table-column>
+          prop="description"/>
       </el-table>
     </el-dialog>
     <!-- 物模型编辑框结束 -->
@@ -184,261 +179,343 @@
 </template>
 
 <script>
-  import { getProductList,createProduct,updateProduct} from '@/api/product'
-  import waves from '@/directive/waves' // 水波纹指令
-  import { parseTime } from '@/utils'
-  export default {
-    name: 'ComplexTable',
-    directives: {
-      waves
-    },
-    filters: {
-      statusFilter(status) {
-        const statusMap = {
-          published: 'success',
-          draft: 'info',
-          deleted: 'danger'
+import { getProductListByOrg, getProductListByCus, getAllProductList, deleteProduct, updateProduct, createProduct } from '@/api/product'
+import waves from '@/directive/waves' // 水波纹指令
+import { parseTime } from '@/utils'
+export default {
+  name: 'ComplexTable',
+  directives: {
+    waves
+  },
+  data() {
+    return {
+      organizationOptions: [
+        {
+          organizationName: 'name',
+          organizationId: '5c1dd642e0b099023a4b4fc0'
         }
-        return statusMap[status]
+      ],
+      customerOptions: [
+        {
+          customerName: 'name',
+          customerId: '5c1dd642e0b099023a4b4fc0'
+        }
+      ],
+      tableKey: 0,
+      listLoading: true,
+      showProDetailFlag: false,
+      temp: {
+        createdBy: '',
+        createdName: '',
+        organizationId: '',
+        organizationName: '',
+        customerId: [],
+        customerName: '',
+
+        description: '',
+        tags: [],
+        specification: []
       },
-      typeFilter(type) {
-        return calendarTypeKeyValue[type]
-      }
-    },
-    data() {
-      return {
-        tableKey: 0,
-        list: null,
-        total: null,
-        listLoading: true,
-        listQuery: {
-          page: 1,
-          limit: 20,
-          name:undefined,
-          type: undefined,
-          id: undefined,
-          description:undefined,
-          address:undefined,
-          contact:undefined,
-          phone:undefined,
-          createdBy:undefined,
-          createAt: undefined,
-          status:'draft',
-          organization:undefined,
-          customer:undefined,
-          tags:[],
-          specification:[]
-        },
-        temp: {
-          id: undefined,
-          description:undefined,
-          address:undefined,
-          contact:undefined,
-          phone:undefined,
-          createdBy:undefined,
-          createAt: undefined,
-          status:'draft',
-          organization:undefined,
-          customer:undefined,
-          tags:[],
-          specification:[]
-        },
-        dialogFormVisible: undefined,
-        specificationDialogVisible:false,
-        dialogStatus: '',
-        textMap: {
-          update: '编辑',
-          create: '创建',
-          staff:'成员管理',
-        },
-        rules: {//表单验证，对应prop值
-          name: [{ required: true, message: '请填写组织名称', trigger: 'change' }]
-        },
-        downloadLoading: false,
-        organizationOptions : undefined,
-        // 标签部分
-        inputVisible: false,
-        inputValue: '',
-      }
-    },
-    created() {
-      this.getProductList()
-    },
-    methods: {
-      getProductList(customerID,organizationID) {
+      dialogFormVisible: false,
+      dialogStatus: '',
+      textMap: {
+        update: '编辑',
+        create: '创建',
+        staff: '成员管理'
+      },
+      productListData: [],
+      nullList: [], // 表格数据为null时，防止.length失效
+      rules: {// 表单验证，对应prop值
+        name: [{ required: true, message: '请填写客户名称', trigger: 'change' }],
+        email: [{ required: true, message: '请填写邮箱', trigger: 'change' }],
+        password: [{ required: true, message: '请输入密码', trigger: 'change' }],
+        fullname: [{ required: true, message: '请填写全名', trigger: 'change' }]
+      },
+      tags: [],
+      specification: [],
+      specificationDialogVisible: false
+    }
+  },
+  created() {
+    this.GetProductList(this.$route.query.customerID)
+  },
+  methods: {
+    GetProductList(cusId) {
+      if (cusId) {
         this.listLoading = true
-        getProductList(this.listQuery).then(response => {
-          this.productListData = response.data.items
-          this.total = response.data.total
-          this.organizationOptions = response.data.organizationOptions//所属组织选项
-          this.customerOptions = response.data.customerOptions//所属客户选项
-          this.listLoading = false
+        getProductListByCus(this.$store.state.user.token, cusId).then(response => { // 如果url中有cusID，则优先根据查询id
+          if (response.data.status == '200') {
+            if (response.data.data == null) {
+              this.productListData = this.nullList
+            } else {
+              this.productListData = response.data.data
+            }
+            this.listLoading = false
+          } else {
+            this.$message.error({
+              message: response.data.msg
+            })
+            this.listLoading = false
+          }
         })
-      },
-      handleFilter() {
-        this.listQuery.page = 1
-        this.getProductList()
-      },
-      handleSizeChange(val) {
-        this.listQuery.limit = val
-        this.getProductList()
-      },
-      handleCurrentChange(val) {
-        this.listQuery.page = val
-        this.getProductList()
-      },
-      handleModifyStatus(row, status) {
-        this.$message({
-          message: '操作成功',
-          type: 'success'
-        })
-        row.status = status
-      },
-      resetTemp() {
-        this.temp = {
-          id: undefined,
-          description:undefined,
-          address:undefined,
-          contact:undefined,
-          phone:undefined,
-          createdBy:undefined,
-          createAt: undefined,
-          status:'draft',
-          organization:undefined,
-          customer:undefined,
-          tags:[],
-          specification:[]
+      } else {
+        if (this.$store.state.user.roles == 'webAdmin') { // url没有id但是是webadmin，查所有
+          this.listLoading = true
+          getAllProductList(this.$store.state.user.token).then(response => {
+            if (response.data.status == '200') {
+              if (response.data.data == null) {
+                this.productListData = this.nullList
+              } else {
+                this.productListData = response.data.data
+              }
+              this.listLoading = false
+            } else {
+              this.$message.error({
+                message: response.data.msg
+              })
+              this.listLoading = false
+            }
+          })
+        } else if (this.$store.state.user.type == 1) { // 没有id 不是webadmin，是组织管理员或成员，根据组织id查其下的所有产品
+          this.listLoading = true
+          getProductListByOrg(this.$store.state.user.token, this.$store.state.user.organizationId).then(response => {
+            if (response.data.status == '200') {
+              if (response.data.data == null) {
+                this.productListData = this.nullList
+              } else {
+                this.productListData = response.data.data
+              }
+              this.listLoading = false
+            } else {
+              this.$message.error({
+                message: response.data.msg
+              })
+              this.listLoading = false
+            }
+          })
+        } else { // 自己是客户管理员或者客户成员，查自己的产品
+          this.listLoading = true
+          getProductListByCus(this.$store.state.user.token, this.$store.state.user.customerId).then(response => {
+            if (response.data.status == '200') {
+              if (response.data.data == null) {
+                this.productListData = this.nullList
+              } else {
+                this.productListData = response.data.data
+              }
+              this.listLoading = false
+            } else {
+              this.$message.error({
+                message: response.data.msg
+              })
+              this.listLoading = false
+            }
+          })
         }
-      },
-      handleCreate() {
+      }
+    },
+    DeleteProduct(row) {
+      if (row.deviceCount > 0) {
+        this.$alert('请删除所有设备后再删除产品?', '拒绝删除', {
+          cancelButtonText: '关闭',
+          type: 'info'
+        })
+      } else {
+        this.$confirm('将删除该产品, 是否继续?', '删除', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          deleteProduct(this.$store.state.user.token, row._id).then(response => {
+            this.listLoading = true
+            this.$message({
+              message: response.data.msg,
+              type: 'success'
+            })
+            this.listLoading = false
+            this.GetProductList(this.$route.query.customerID)
+          })
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '未删除'
+          })
+        })
+      }
+    },
+    resetTemp() {
+      this.temp = {
+        createdBy: '',
+        organizationId: '',
+        customerId: [],
+
+        description: '',
+        tags: []
+      }
+      this.showProDetailFlag = false
+    },
+    handleCreate() {
+      if (this.$store.state.user.roles != 'customerAdmin') {
+        this.$alert('请使用客户管理员帐号新建产品', '拒绝新建', {
+          cancelButtonText: '关闭',
+          type: 'info'
+        })
+      } else {
         this.resetTemp()
         this.dialogStatus = 'create'
         this.dialogFormVisible = true
         this.$nextTick(() => {
           this.$refs['dataForm'].clearValidate()
         })
-      },
-      createData() {
+      }
+    },
+    CreateProduct() {
+      this.$confirm('将创建该产品, 是否继续?', '创建', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
         this.$refs['dataForm'].validate((valid) => {
           if (valid) {
-            this.temp.id = parseInt(Math.random() * 100) // mock a id
-            this.temp.createdBy = 'vue-element-admin'
-            this.temp.createAt = '1234566'
-            this.temp.status = 'draft'
-            createProduct(this.temp).then((response) => {
-              if(response.data.type=='success')
-              {
-                this.productListData.unshift(this.temp)
+            this.temp.createdBy = this.$store.state.user._id// 创建人
+            this.temp.createdName = this.$store.state.user.fullname// 创建人
+            this.temp.customerId[0] = this.$store.state.user.customerId// 所属客户
+            this.temp.customerName = this.$store.state.user.customerName// 所属客户
+            this.temp.organizationId = this.$store.state.user.organizationId// 所属组织
+            this.temp.organizationName = this.$store.state.user.organizationName// 所属组织
+            this.temp.tags[0] = 'tagtest'
+            createProduct(this.$store.state.user.token, this.temp).then((response) => {
+              if (response.data.status == '200') {
                 this.dialogFormVisible = false
+                this.GetProductList(this.$route.query.customerID)
                 this.$notify({
-                  title: response.data.title,
-                  message: response.data.message,
-                  type: response.data.type,
+                  title: response.data.msg,
+                  type: 'success',
                   duration: 2000
                 })
-              }
-              else {
-                this.$notify({
-                  title: response.data.title,
-                  message: response.data.message,
-                  type: response.data.type,
+              } else {
+                this.$notify.error({
+                  title: response.data.msg,
                   duration: 2000
                 })
               }
             })
           }
         })
-      },
-      handleUpdate(row) {
-        this.temp = Object.assign({}, row) // copy obj
-        // this.temp.timestamp = new Date(this.temp.timestamp)
-        this.dialogStatus = 'update'
-        this.dialogFormVisible = true
-        this.$nextTick(() => {
-          this.$refs['dataForm'].clearValidate()
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '未创建'
         })
-      },
-      updateData() {
+      })
+    },
+    handleUpdate(row) {
+      this.temp = Object.assign({}, row) // copy obj
+      this.dialogStatus = 'update'
+      this.dialogFormVisible = true
+      this.$nextTick(() => {
+        this.$refs['dataForm'].clearValidate()
+      })
+    },
+    UpdateProduct() {
+      this.$confirm('将修改该产品, 是否继续?', '修改', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
         this.$refs['dataForm'].validate((valid) => {
           if (valid) {
             const tempData = Object.assign({}, this.temp)
-            updateProduct(tempData).then((response) => {
-              if(response.data.type=='success'){//返回type是success时，关弹窗，改列表
-                for (const v of this.productListData) {
-                  if (v.id === this.temp.id) {
-                    const index = this.productListData.indexOf(v)
-                    this.productListData.splice(index, 1, this.temp)
-                    break
-                  }
-                }
+            updateProduct(this.$store.state.user.token, this.temp._id, tempData).then((response) => {
+              if (response.data.status == '200') { // 返回type是success时，关弹窗，改列表
                 this.dialogFormVisible = false
+                this.GetProductList(this.$route.query.customerID)
                 this.$notify({
-                  title: response.data.title,
-                  message: response.data.message,
-                  type: response.data.type,
+                  title: response.data.msg,
+                  type: 'success',
                   duration: 2000
                 })
-              }
-              else {
-                this.$notify({
-                  title: response.data.title,
-                  message: response.data.message,
-                  type: response.data.type,
+              } else {
+                this.$notify.error({
+                  title: response.data.msg,
                   duration: 2000
                 })
               }
             })
           }
         })
-      },
-
-      formatJson(filterVal, jsonData) {
-        return jsonData.map(v => filterVal.map(j => {
-          if (j === 'timestamp') {
-            return parseTime(v[j])
-          } else {
-            return v[j]
-          }
-        }))
-      },
-      jumpRouter(url,param){
-        this.$router.push({path:'/'+url+'/index'+param})
-      },
-
-    //  标签部分JS
-      handleClose(tag) {
-        this.temp.tags.splice(this.temp.tags.indexOf(tag), 1);
-      },
-
-      showInput() {
-        this.inputVisible = true;
-        this.$nextTick(_ => {
-          this.$refs.saveTagInput.$refs.input.focus();
-        });
-      },
-
-      handleInputConfirm() {
-        let inputValue = this.inputValue;
-        if (inputValue) {
-          this.temp.tags.push(inputValue);
-        }
-        this.inputVisible = false;
-        this.inputValue = '';
-      },
-      // 标签部分JS结束
-
-      // 物模型部分
-      handleSpecification() {
-        this.specificationDialogTitle = '编辑物模型'
-        this.specificationDialogVisible = true
-        this.$nextTick(() => {
-          this.$refs['dataForm'].clearValidate()
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '未修改'
         })
-      },
+      })
+    },
+    handleExport() {
+      import('@/vendor/Export2Excel').then(excel => {
+        const tHeader = ['name', 'createdBy']
+        const filterVal = ['name', 'createdBy']
+        const list = this.productListData
+        const data = this.formatJson(filterVal, list)
+        excel.export_json_to_excel({
+          header: tHeader,
+          data,
+          filename: 'export-Excel',
+          autoWidth: true,
+          bookType: 'xlsx'
+        })
+      })
+    },
+    formatJson(filterVal, jsonData) {
+      return jsonData.map(v => filterVal.map(j => {
+        if (j === 'timestamp') {
+          return parseTime(v[j])
+        } else {
+          return v[j]
+        }
+      }))
+    },
+    jumpRouter(url, param) {
+      this.$router.push({ path: '/' + url + '/index' + param })
+    },
+    //  标签部分JS
+    handleClose(tag) {
+      this.temp.tags.splice(this.temp.tags.indexOf(tag), 1)
+    },
+
+    showInput() {
+      this.inputVisible = true
+      this.$nextTick(_ => {
+        this.$refs.saveTagInput.$refs.input.focus()
+      })
+    },
+
+    handleInputConfirm() {
+      let inputValue = this.inputValue
+      if (inputValue) {
+        this.temp.tags.push(inputValue)
+      }
+      this.inputVisible = false
+      this.inputValue = ''
+    },
+    // 标签部分JS结束
+
+    // 物模型部分
+    handleSpecification() {
+      this.specificationDialogTitle = '编辑物模型'
+      this.specificationDialogVisible = true
+      this.$nextTick(() => {
+        this.$refs['dataForm'].clearValidate()
+      })
     }
   }
+}
 </script>
-
+<style>
+  .dialogButton{
+    text-align: right;
+    padding-bottom: 20px;
+  }
+</style>
 <!--标签部分样式-->
 <style>
   .el-tag {
@@ -471,5 +548,6 @@
 
     width: 100%;
   }
-  
+
 </style>
+
