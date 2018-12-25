@@ -4,8 +4,8 @@
       <!-- TODO -->
       <el-input :placeholder="$t('table.customerName')" v-model="temp.name" clearable style="width: 200px;" class="filter-item" />
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" >{{ $t('table.search') }}</el-button>
-      <el-button v-if="this.$store.state.user.role == 0" class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">{{ $t('table.add') }}</el-button>
-      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="document" @click="handleExport">{{ $t('excel.export') }} Excel</el-button>
+      <el-button v-if="this.$store.state.user.role == 0" class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">{{ $t('table.createCustomer') }}</el-button>
+      <el-button v-if="customerListData.length>0" class="filter-item" style="margin-left: 10px;" type="primary" icon="document" @click="handleExport">{{ $t('excel.export') }} Excel</el-button>
 
     </div>
     <el-table
@@ -32,10 +32,10 @@
           <span>{{ scope.row.organizationName }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('table.countStaff')" align="center" width="95" @click="handleStaffList(scope.row.name, scope.row._id)">
+      <el-table-column :label="$t('table.countStaff')" align="center" width="95">
         <template slot-scope="scope">
-          <span v-if="scope.row.memberCount" class="link-type" @click="handleStaffList(scope.row.name, scope.row._id, scope.row.organizationId, scope.row.organizationName)">{{ scope.row.memberCount }}</span>
-          <span v-else class="link-type" @click="handleStaffList(scope.row.name, scope.row._id, scope.row.organizationId, scope.row.organizationName)">0</span>
+          <span v-if="scope.row.memberCount" class="link-type" @click="openStaffDialog(scope.row.name, scope.row._id, scope.row.organizationId, scope.row.organizationName)">{{ scope.row.memberCount }}</span>
+          <span v-else class="link-type" @click="openStaffDialog(scope.row.name, scope.row._id, scope.row.organizationId, scope.row.organizationName)">0</span>
         </template>
       </el-table-column>
       <el-table-column :label="$t('table.countProducts')" align="center" width="95">
@@ -79,15 +79,6 @@
         <el-form-item :label="$t('table.contact')" prop="contact">
           <el-input v-model="temp.contact" :disabled="!(this.$store.state.user.role == 0)" clearable/>
         </el-form-item>
-        <el-form-item v-if="dialogStatus == 'create'" :label="$t('table.organization')">
-          <el-select v-model="temp.organization" clearable placeholder="请选择所属组织">
-            <el-option
-              v-for="item in organizationOptions"
-              :key="item.value"
-              :label="item.organizationName"
-              :value="item.organizationId"/>
-          </el-select>
-        </el-form-item>
         <el-form-item :label="$t('table.phone')" prop="phone">
           <el-input v-model="temp.phone" :disabled="!(this.$store.state.user.role == 0)" clearable/>
         </el-form-item>
@@ -102,25 +93,32 @@
         <div v-show="showCusDetailFlag">
           <el-form label-position="left" label-width="90px" style="width: 400px; margin-left:50px;">
             <el-form-item :label="$t('table.id')" prop="_id" >
-              <el-input v-model="temp._id" :disabled="true"/>
+              <!-- <el-input v-model="temp._id" :disabled="true"/> -->
+              <span>{{ temp._id }}</span>
             </el-form-item>
             <el-form-item :label="$t('table.creater')" prop="createdBy" >
-              <el-input v-model="temp.createdBy" :disabled="true"/>
+              <!-- <el-input v-model="temp.createdBy" :disabled="true"/> -->
+              <span>{{ temp.createdBy }}</span>
             </el-form-item>
             <el-form-item :label="$t('table.createdName')" prop="createdName" >
-              <el-input v-model="temp.createdName" :disabled="true"/>
+              <!-- <el-input v-model="temp.createdName" :disabled="true"/> -->
+              <span>{{ temp.createdName }}</span>
             </el-form-item>
             <el-form-item :label="$t('table.organization')" prop="organization" >
-              <el-input v-model="temp.organizationId" :disabled="true"/>
+              <!-- <el-input v-model="temp.organizationId" :disabled="true"/> -->
+              <span>{{ temp.organizationId }}</span>
             </el-form-item>
             <el-form-item :label="$t('table.organizationName')" prop="organizationName" >
-              <el-input v-model="temp.organizationName" :disabled="true"/>
+              <!-- <el-input v-model="temp.organizationName" :disabled="true"/> -->
+              <span>{{ temp.organizationName }}</span>
             </el-form-item>
-            <el-form-item :label="$t('table.memberCount')" prop="memberCount" >
-              <el-input v-model="temp.memberCount" :disabled="true"/>
+            <el-form-item v-if="temp.memberCount" :label="$t('table.memberCount')" prop="memberCount" >
+              <!-- <el-input v-model="temp.memberCount" :disabled="true"/> -->
+              <span>{{ temp.memberCount }}</span>
             </el-form-item>
             <el-form-item :label="$t('table.createdAt')" prop="createdAt" >
-              <el-input v-model="temp.createdAt" :disabled="true"/>
+              <!-- <el-input v-model="temp.createdAt" :disabled="true"/> -->
+              <span>{{ temp.createdAt }}</span>
             </el-form-item>
           </el-form>
         </div>
@@ -158,7 +156,7 @@
             <el-button v-if="scope.row.role == '1'" type="danger" @click="handleSetAdmin(tempCustomerName, tempCustomerId,scope.row)">{{ $t('table.notAdmin') }}
             </el-button>
             <!--//不是管理员，文字显示设置管理员-->
-            <el-button type="danger" icon="el-icon-delete" @click="DeleteOrgStaff(tempCustomerName, tempCustomerId, scope.row)"/>
+            <el-button type="danger" icon="el-icon-delete" @click="DeleteCustomerStaff(tempCustomerName, tempCustomerId, scope.row)"/>
           </template>
         </el-table-column>
       </el-table>
@@ -171,7 +169,7 @@
     <el-dialog :title= "updateStaffTitle" :visible.sync="updateStaffFormVisible">
       <el-form ref="updateStaffForm" :rules="rules" :model="temp" label-position="left" label-width="90px" style="width: 400px; margin-left:50px;">
         <el-form-item :label="$t('table.email')" prop="email">
-          <el-input v-model="temp.email" :disabled="!(this.$store.state.user.role == 0)" clearable autofocus/>
+          <el-input v-model="temp.email" :disabled="!(this.$store.state.user.role == 0) || dialogStatus !='create'" clearable autofocus/>
         </el-form-item>
         <el-form-item :label="$t('table.password')" prop="password">
           <el-input v-model="temp.password" :disabled="!(this.$store.state.user.role == 0)" type="password" clearable/>
@@ -193,22 +191,36 @@
         <div v-show="showCusDetailFlag">
           <el-form label-position="left" label-width="90px" style="width: 400px; margin-left:50px;">
             <el-form-item :label="$t('table.id')" prop="_id" >
-              <el-input v-model="temp._id" :disabled="true"/>
+              <!-- <el-input v-model="temp._id" :disabled="true"/> -->
+              <span>{{ temp._id }}</span>
             </el-form-item>
             <el-form-item :label="$t('table.creater')" prop="createdBy" >
-              <el-input v-model="temp.createdBy" :disabled="true"/>
+              <!-- <el-input v-model="temp.createdBy" :disabled="true"/> -->
+              <span>{{ temp.createdBy }}</span>
             </el-form-item>
             <el-form-item :label="$t('table.createdName')" prop="createdName" >
-              <el-input v-model="temp.createdName" :disabled="true"/>
+              <!-- <el-input v-model="temp.createdName" :disabled="true"/> -->
+              <span>{{ temp.createdName }}</span>
             </el-form-item>
-            <el-form-item :label="$t('table.customerId')" prop="customerId" >
-              <el-input v-model="temp.customerId" :disabled="true"/>
+            <el-form-item v-if="temp.organizationId" :label="$t('table.organizationId')" prop="organizationId" >
+              <!-- <el-input v-model="temp.organizationId" :disabled="true"/> -->
+              <span>{{ temp.organizationId }}</span>
             </el-form-item>
-            <el-form-item :label="$t('table.customerName')" prop="customerName" >
-              <el-input v-model="temp.customerName" :disabled="true"/>
+            <el-form-item v-if="temp.organizationName" :label="$t('table.organizationName')" prop="organizationName" >
+              <!-- <el-input v-model="temp.organizationName" :disabled="true"/> -->
+              <span>{{ temp.organizationName }}</span>
+            </el-form-item>
+            <el-form-item v-if="temp.customerId" :label="$t('table.customerId')" prop="customerId" >
+              <!-- <el-input v-model="temp.customerId" :disabled="true"/> -->
+              <span>{{ temp.customerId }}</span>
+            </el-form-item>
+            <el-form-item v-if="temp.customerName" :label="$t('table.customerName')" prop="customerName" >
+              <!-- <el-input v-model="temp.customerName" :disabled="true"/> -->
+              <span>{{ temp.customerName }}</span>
             </el-form-item>
             <el-form-item :label="$t('table.createdAt')" prop="createdAt" >
-              <el-input v-model="temp.createdAt" :disabled="true"/>
+              <!-- <el-input v-model="temp.createdAt" :disabled="true"/> -->
+              <span>{{ temp.createdAt }}</span>
             </el-form-item>
           </el-form>
         </div>
@@ -230,18 +242,12 @@ export default {
   },
   data() {
     return {
-      organizationOptions: [
-        {
-          organizationName: 'name',
-          organizationId: '5c1dd642e0b099023a4b4fc0'
-        }
-      ],
       tableKey: 0,
       listLoading: true,
-      tempCustomerId: '', // 点某条org的成员时，记录一下，添加成员的时候使用
-      tempCustomerName: '',
-      tempOrgName: '',
-      tempOrgId: '',
+      // tempCustomerId: '', // 点某条org的成员时，记录一下，添加成员的时候使用
+      // tempCustomerName: '',
+      // tempOrgName: '',
+      // tempOrgId: '',
       showCusDetailFlag: false,
       temp: {
         email: '',
@@ -267,7 +273,7 @@ export default {
         staff: '成员管理'
       },
       staffListData: [], // 初始化 ，防止.length失效
-      CustomerListData: [],
+      customerListData: [],
       nullList: [], // 表格数据为null时，防止.length失效
       rules: {// 表单验证，对应prop值
         name: [{ required: true, message: '请填写客户名称', trigger: 'change' }],
@@ -339,7 +345,17 @@ export default {
     },
     DeleteCustomer(row) {
       if (row.memberCount > 0) {
-        this.$alert('请删除所有成员后再删除组织?', '拒绝删除', {
+        this.$alert('请删除所有成员后再删除客户?', '拒绝删除', {
+          cancelButtonText: '关闭',
+          type: 'info'
+        })
+      } else if (row.productCount > 0) {
+        this.$alert('请删除所有产品后再删除客户?', '拒绝删除', {
+          cancelButtonText: '关闭',
+          type: 'info'
+        })
+      } else if (row.deviceCount > 0) {
+        this.$alert('请删除所有设备后再删除客户?', '拒绝删除', {
           cancelButtonText: '关闭',
           type: 'info'
         })
@@ -477,14 +493,19 @@ export default {
         })
       })
     },
+    openStaffDialog(customerName, customerId, organizationId, organizationName) {
+      // 该函数仅限点成员数字时使用，避免每次删除、更改操作都会把临时的orgId置为空
+      // 因为更新、删除操作只传两个参数
+      this.tempOrgId = organizationId
+      this.tempOrgName = organizationName
+      this.handleStaffList(customerName, customerId)
+    },
     handleStaffList(customerName, customerId, organizationId, organizationName) {
       this.staffListTitle = '您正在管理客户： ' + customerName + '  的成员：'
       this.dialogStatus = 'staff'
       this.staffFormVisible = true
       this.tempCustomerId = customerId // 临时存到这里
       this.tempCustomerName = customerName
-      this.tempOrgId = organizationId
-      this.tempOrgName = organizationName
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
@@ -685,7 +706,7 @@ export default {
           })
           this.listLoading = false
           this.handleStaffList(customerName, customerId)// 刷新该customer的成员列表
-          this.GetOrganizationList()
+          this.GetCustomerList(this.$route.query.organizationID)
         })
       }).catch(() => {
         this.$message({

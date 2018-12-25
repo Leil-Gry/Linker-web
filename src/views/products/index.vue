@@ -4,8 +4,8 @@
       <!-- TODO -->
       <el-input :placeholder="$t('table.productName')" v-model="temp.name" clearable style="width: 200px;" class="filter-item" />
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" >{{ $t('table.search') }}</el-button>
-      <el-button v-if="this.$store.state.user.role == 0" class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">{{ $t('table.add') }}</el-button>
-      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="document" @click="handleExport">{{ $t('excel.export') }} Excel</el-button>
+      <el-button v-if="this.$store.state.user.role == 0" class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">{{ $t('table.createProduct') }}</el-button>
+      <el-button v-if="productListData.length>0" class="filter-item" style="margin-left: 10px;" type="primary" icon="document" @click="handleExport">{{ $t('excel.export') }} Excel</el-button>
 
     </div>
     <el-table
@@ -61,28 +61,7 @@
         label-width="90px"
         style="width: 400px; margin-left:50px;">
         <el-form-item :label="$t('table.productName')" prop="name">
-          <el-input v-model="temp.name" clearable autofocus/>
-        </el-form-item>
-        <el-form-item :label="$t('table.description')">
-          <el-input :autosize="{ minRows: 2, maxRows: 4}" v-model="temp.description" type="textarea" />
-        </el-form-item>
-        <el-form-item :label="$t('table.organization')">
-          <el-select v-model="temp.organization" clearable placeholder="请选择所属组织">
-            <el-option
-              v-for="item in organizationOptions"
-              :key="item.value"
-              :label="item.organizationName"
-              :value="item.organizationId"/>
-          </el-select>
-        </el-form-item>
-        <el-form-item :label="$t('table.customer')">
-          <el-select v-model="temp.customer" clearable placeholder="请选择所属客户">
-            <el-option
-              v-for="item in customerOptions"
-              :key="item.value"
-              :label="item.customerName"
-              :value="item.customerId"/>
-          </el-select>
+          <el-input v-model="temp.name" :disabled="!(this.$store.state.user.role == 0) || dialogStatus !='create' " clearable autofocus/>
         </el-form-item>
 
         <!-- 物模型部分开始 -->
@@ -103,6 +82,7 @@
             {{ tag }}
           </el-tag>
           <el-input
+            v-show="this.$store.state.user.role == 0"
             v-if="inputVisible"
             ref="saveTagInput"
             v-model="inputValue"
@@ -110,21 +90,60 @@
             size="small"
             @keyup.enter.native="handleInputConfirm"
             @blur="handleInputConfirm"/>
-          <el-button v-else class="button-new-tag" size="mini" @click="showInput">+ New Tag</el-button>
+          <el-button v-show="this.$store.state.user.role == 0" v-else class="button-new-tag" size="mini" @click="showInput">+ 新建标签</el-button>
         </el-form-item>
         <!--标签部分结束-->
-
-        <el-form-item :label="$t('table.createAt')" prop="createAt" >
-          <el-input v-model="temp.createAt" :disabled="true"/>
-        </el-form-item>
-        <el-form-item :label="$t('table.creater')" prop="createdBy" >
-          <el-input v-model="temp.createdBy" :disabled="true"/>
-        </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
+      <div class="dialogButton">
+        <el-button v-if="dialogStatus !='create' && showProDetailFlag == false" @click="showProDetailFlag = true">{{ $t('table.showDetail') }}</el-button>
+        <el-button v-if="dialogStatus !='create' && showProDetailFlag == true" @click="showProDetailFlag = false">{{ $t('table.closeDetail') }}</el-button>
         <el-button @click="dialogFormVisible = false">{{ $t('table.cancel') }}</el-button>
-        <el-button type="primary" @click="dialogStatus==='create'?CreateProduct():UpdateProduct()">{{ $t('table.confirm') }}</el-button>
+        <el-button v-if="this.$store.state.user.role == 0" type="primary" @click="dialogStatus==='create'?CreateProduct():UpdateProduct()">{{ $t('table.confirm') }}</el-button>
       </div>
+      <el-collapse-transition>
+        <div v-show="showProDetailFlag">
+          <el-form label-position="left" label-width="90px" style="width: 400px; margin-left:50px;">
+            <el-form-item :label="$t('table.id')" prop="_id" >
+              <!-- <el-input v-model="temp._id" :disabled="true"/> -->
+              <span>{{ temp._id }}</span>
+            </el-form-item>
+            <el-form-item :label="$t('table.creater')" prop="createdBy" >
+              <!-- <el-input v-model="temp.createdBy" :disabled="true"/> -->
+              <span>{{ temp.createdBy }}</span>
+            </el-form-item>
+            <el-form-item :label="$t('table.createdName')" prop="createdName" >
+              <!-- <el-input v-model="temp.createdName" :disabled="true"/> -->
+              <span>{{ temp.createdName }}</span>
+            </el-form-item>
+            <el-form-item :label="$t('table.organization')" prop="organization" >
+              <!-- <el-input v-model="temp.organizationId" :disabled="true"/> -->
+              <span>{{ temp.organizationId }}</span>
+            </el-form-item>
+            <el-form-item :label="$t('table.organizationName')" prop="organizationName" >
+              <!-- <el-input v-model="temp.organizationName" :disabled="true"/> -->
+              <span>{{ temp.organizationName }}</span>
+            </el-form-item>
+            <el-form-item :label="$t('table.customer')" prop="customer" >
+              <span
+                v-for="customerIds in temp.customerId"
+                :key="customerIds">
+                {{ customerIds }}
+              </span>
+            </el-form-item>
+            <el-form-item :label="$t('table.customerName')" prop="customerName" >
+              <span>{{ temp.customerName }}</span>
+            </el-form-item>
+            <el-form-item v-if="temp.memberCount" :label="$t('table.memberCount')" prop="memberCount" >
+              <!-- <el-input v-model="temp.memberCount" :disabled="true"/> -->
+              <span>{{ temp.memberCount }}</span>
+            </el-form-item>
+            <el-form-item :label="$t('table.createdAt')" prop="createdAt" >
+              <!-- <el-input v-model="temp.createdAt" :disabled="true"/> -->
+              <span>{{ temp.createdAt }}</span>
+            </el-form-item>
+          </el-form>
+        </div>
+      </el-collapse-transition>
     </el-dialog>
 
     <!-- 物模型编辑框开始 -->
@@ -189,18 +208,6 @@ export default {
   },
   data() {
     return {
-      organizationOptions: [
-        {
-          organizationName: 'name',
-          organizationId: '5c1dd642e0b099023a4b4fc0'
-        }
-      ],
-      customerOptions: [
-        {
-          customerName: 'name',
-          customerId: '5c1dd642e0b099023a4b4fc0'
-        }
-      ],
       tableKey: 0,
       listLoading: true,
       showProDetailFlag: false,
@@ -232,8 +239,11 @@ export default {
         fullname: [{ required: true, message: '请填写全名', trigger: 'change' }]
       },
       tags: [],
+      inputVisible: false,
+      inputValue: '',
       specification: [],
-      specificationDialogVisible: false
+      specificationDialogVisible: false,
+      specificationDialogTitle: ''
     }
   },
   created() {
@@ -259,23 +269,42 @@ export default {
           }
         })
       } else {
-        if (this.$store.state.user.roles == 'webAdmin') { // url没有id但是是webadmin，查所有
-          this.listLoading = true
-          getAllProductList(this.$store.state.user.token).then(response => {
-            if (response.data.status == '200') {
-              if (response.data.data == null) {
-                this.productListData = this.nullList
+        if (this.$store.state.user.roles == 'webAdmin') { // url没有id但是是webadmin
+          if (this.$route.query.organizationID) { // 有orgId 优先根据orgId查
+            this.listLoading = true
+            getProductListByOrg(this.$store.state.user.token, this.$route.query.organizationID).then(response => {
+              if (response.data.status == '200') {
+                if (response.data.data == null) {
+                  this.productListData = this.nullList
+                } else {
+                  this.productListData = response.data.data
+                }
+                this.listLoading = false
               } else {
-                this.productListData = response.data.data
+                this.$message.error({
+                  message: response.data.msg
+                })
+                this.listLoading = false
               }
-              this.listLoading = false
-            } else {
-              this.$message.error({
-                message: response.data.msg
-              })
-              this.listLoading = false
-            }
-          })
+            })
+          } else {
+            this.listLoading = true
+            getAllProductList(this.$store.state.user.token).then(response => {
+              if (response.data.status == '200') {
+                if (response.data.data == null) {
+                  this.productListData = this.nullList
+                } else {
+                  this.productListData = response.data.data
+                }
+                this.listLoading = false
+              } else {
+                this.$message.error({
+                  message: response.data.msg
+                })
+                this.listLoading = false
+              }
+            })
+          }
         } else if (this.$store.state.user.type == 1) { // 没有id 不是webadmin，是组织管理员或成员，根据组织id查其下的所有产品
           this.listLoading = true
           getProductListByOrg(this.$store.state.user.token, this.$store.state.user.organizationId).then(response => {
@@ -382,7 +411,6 @@ export default {
             this.temp.customerName = this.$store.state.user.customerName// 所属客户
             this.temp.organizationId = this.$store.state.user.organizationId// 所属组织
             this.temp.organizationName = this.$store.state.user.organizationName// 所属组织
-            this.temp.tags[0] = 'tagtest'
             createProduct(this.$store.state.user.token, this.temp).then((response) => {
               if (response.data.status == '200') {
                 this.dialogFormVisible = false

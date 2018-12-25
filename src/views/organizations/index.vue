@@ -5,7 +5,7 @@
       <el-input :placeholder="$t('table.organizationName')" v-model="temp.name" clearable style="width: 200px;" class="filter-item" />
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" >{{ $t('table.search') }}</el-button>
       <el-button v-if="this.$store.state.user.role == 0" class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">{{ $t('table.createOrganization') }}</el-button>
-      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="document" @click="handleExport">{{ $t('excel.export') }} Excel</el-button>
+      <el-button v-if="organizationListData.length>0" class="filter-item" style="margin-left: 10px;" type="primary" icon="document" @click="handleExport">{{ $t('excel.export') }} Excel</el-button>
 
     </div>
     <el-table
@@ -35,7 +35,7 @@
           <span>{{ scope.row.createdName }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('table.countStaff')" align="center" width="95" @click="handleStaffList(scope.row.name, scope.row._id)">
+      <el-table-column :label="$t('table.countStaff')" align="center" width="95">
         <template slot-scope="scope">
           <span v-if="scope.row.memberCount" class="link-type" @click="handleStaffList(scope.row.name, scope.row._id)">{{ scope.row.memberCount }}</span>
           <span v-else class="link-type" @click="handleStaffList(scope.row.name, scope.row._id)">0</span>
@@ -102,19 +102,24 @@
         <div v-show="showOrgDetailFlag">
           <el-form label-position="left" label-width="90px" style="width: 400px; margin-left:50px;">
             <el-form-item :label="$t('table.id')" prop="_id" >
-              <el-input v-model="temp._id" :disabled="true"/>
+              <!-- <el-input v-model="temp._id" :disabled="true"/> -->
+              <span>{{ temp._id }}</span>
             </el-form-item>
             <el-form-item :label="$t('table.creater')" prop="createdBy" >
-              <el-input v-model="temp.createdBy" :disabled="true"/>
+              <!-- <el-input v-model="temp.createdBy" :disabled="true"/> -->
+              <span>{{ temp.createdBy }}</span>
             </el-form-item>
             <el-form-item :label="$t('table.createdName')" prop="createdName" >
-              <el-input v-model="temp.createdName" :disabled="true"/>
+              <!-- <el-input v-model="temp.createdName" :disabled="true"/> -->
+              <span>{{ temp.createdName }}</span>
             </el-form-item>
-            <el-form-item :label="$t('table.memberCount')" prop="memberCount" >
-              <el-input v-model="temp.memberCount" :disabled="true"/>
+            <el-form-item v-if="temp.memberCount" :label="$t('table.memberCount')" prop="memberCount" >
+              <!-- <el-input v-model="temp.memberCount" :disabled="true"/> -->
+              <span>{{ temp.memberCount }}</span>
             </el-form-item>
             <el-form-item :label="$t('table.createdAt')" prop="createdAt" >
-              <el-input v-model="temp.createdAt" :disabled="true"/>
+              <!-- <el-input v-model="temp.createdAt" :disabled="true"/> -->
+              <span>{{ temp.createdAt }}</span>
             </el-form-item>
           </el-form>
         </div>
@@ -187,22 +192,36 @@
         <div v-show="showOrgDetailFlag">
           <el-form label-position="left" label-width="90px" style="width: 400px; margin-left:50px;">
             <el-form-item :label="$t('table.id')" prop="_id" >
-              <el-input v-model="temp._id" :disabled="true"/>
+              <!-- <el-input v-model="temp._id" :disabled="true"/> -->
+              <span>{{ temp._id }}</span>
             </el-form-item>
             <el-form-item :label="$t('table.creater')" prop="createdBy" >
-              <el-input v-model="temp.createdBy" :disabled="true"/>
+              <!-- <el-input v-model="temp.createdBy" :disabled="true"/> -->
+              <span>{{ temp.createdBy }}</span>
             </el-form-item>
             <el-form-item :label="$t('table.createdName')" prop="createdName" >
-              <el-input v-model="temp.createdName" :disabled="true"/>
+              <!-- <el-input v-model="temp.createdName" :disabled="true"/> -->
+              <span>{{ temp.createdName }}</span>
             </el-form-item>
-            <el-form-item :label="$t('table.organizationId')" prop="organizationId" >
-              <el-input v-model="temp.organizationId" :disabled="true"/>
+            <el-form-item v-if="temp.organizationId" :label="$t('table.organizationId')" prop="organizationId" >
+              <!-- <el-input v-model="temp.organizationId" :disabled="true"/> -->
+              <span>{{ temp.organizationId }}</span>
             </el-form-item>
-            <el-form-item :label="$t('table.organizationName')" prop="organizationName" >
-              <el-input v-model="temp.organizationName" :disabled="true"/>
+            <el-form-item v-if="temp.organizationName" :label="$t('table.organizationName')" prop="organizationName" >
+              <!-- <el-input v-model="temp.organizationName" :disabled="true"/> -->
+              <span>{{ temp.organizationName }}</span>
+            </el-form-item>
+            <el-form-item v-if="temp.customerId" :label="$t('table.customerId')" prop="customerId" >
+              <!-- <el-input v-model="temp.customerId" :disabled="true"/> -->
+              <span>{{ temp.customerId }}</span>
+            </el-form-item>
+            <el-form-item v-if="temp.customerName" :label="$t('table.customerName')" prop="customerName" >
+              <!-- <el-input v-model="temp.customerName" :disabled="true"/> -->
+              <span>{{ temp.customerName }}</span>
             </el-form-item>
             <el-form-item :label="$t('table.createdAt')" prop="createdAt" >
-              <el-input v-model="temp.createdAt" :disabled="true"/>
+              <!-- <el-input v-model="temp.createdAt" :disabled="true"/> -->
+              <span>{{ temp.createdAt }}</span>
             </el-form-item>
           </el-form>
         </div>
@@ -290,6 +309,21 @@ export default {
     DeleteOrganization(row) {
       if (row.memberCount > 0) {
         this.$alert('请删除所有成员后再删除组织?', '拒绝删除', {
+          cancelButtonText: '关闭',
+          type: 'info'
+        })
+      } else if (row.customerCount > 0) {
+        this.$alert('请删除所有客户后再删除组织?', '拒绝删除', {
+          cancelButtonText: '关闭',
+          type: 'info'
+        })
+      } else if (row.productCount > 0) {
+        this.$alert('请删除所有产品后再删除组织?', '拒绝删除', {
+          cancelButtonText: '关闭',
+          type: 'info'
+        })
+      } else if (row.deviceCount > 0) {
+        this.$alert('请删除所有设备后再删除组织?', '拒绝删除', {
           cancelButtonText: '关闭',
           type: 'info'
         })

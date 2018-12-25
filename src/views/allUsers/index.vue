@@ -22,22 +22,22 @@
           <span class="link-type" @click="handleUpdateUser(scope.row)">{{ scope.row.email }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('table.phone')" align="center" width="95">
+      <el-table-column :label="$t('table.phone')" align="center" width="150">
         <template slot-scope="scope">
           <span>{{ scope.row.phone }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('table.fullname')" align="center" width="95">
+      <el-table-column :label="$t('table.fullname')" align="center" width="150">
         <template slot-scope="scope">
           <span>{{ scope.row.fullname }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('table.organizationName')" align="center" width="95">
+      <el-table-column :label="$t('table.organizationName')" align="center" width="150">
         <template slot-scope="scope">
           <span>{{ scope.row.organizationName }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('table.customerName')" align="center" width="95">
+      <el-table-column :label="$t('table.customerName')" align="center" width="150">
         <template slot-scope="scope">
           <span>{{ scope.row.customerName }}</span>
         </template>
@@ -88,28 +88,36 @@
         <div v-show="showOrgDetailFlag">
           <el-form label-position="left" label-width="90px" style="width: 400px; margin-left:50px;">
             <el-form-item :label="$t('table.id')" prop="_id" >
-              <el-input v-model="temp._id" :disabled="true"/>
+              <!-- <el-input v-model="temp._id" :disabled="true"/> -->
+              <span>{{ temp._id }}</span>
             </el-form-item>
             <el-form-item :label="$t('table.creater')" prop="createdBy" >
-              <el-input v-model="temp.createdBy" :disabled="true"/>
+              <!-- <el-input v-model="temp.createdBy" :disabled="true"/> -->
+              <span>{{ temp.createdBy }}</span>
             </el-form-item>
             <el-form-item :label="$t('table.createdName')" prop="createdName" >
-              <el-input v-model="temp.createdName" :disabled="true"/>
+              <!-- <el-input v-model="temp.createdName" :disabled="true"/> -->
+              <span>{{ temp.createdName }}</span>
             </el-form-item>
             <el-form-item v-if="temp.organizationId" :label="$t('table.organizationId')" prop="organizationId" >
-              <el-input v-model="temp.organizationId" :disabled="true"/>
+              <!-- <el-input v-model="temp.organizationId" :disabled="true"/> -->
+              <span>{{ temp.organizationId }}</span>
             </el-form-item>
             <el-form-item v-if="temp.organizationName" :label="$t('table.organizationName')" prop="organizationName" >
-              <el-input v-model="temp.organizationName" :disabled="true"/>
+              <!-- <el-input v-model="temp.organizationName" :disabled="true"/> -->
+              <span>{{ temp.organizationName }}</span>
             </el-form-item>
             <el-form-item v-if="temp.customerId" :label="$t('table.customerId')" prop="customerId" >
-              <el-input v-model="temp.customerId" :disabled="true"/>
+              <!-- <el-input v-model="temp.customerId" :disabled="true"/> -->
+              <span>{{ temp.customerId }}</span>
             </el-form-item>
             <el-form-item v-if="temp.customerName" :label="$t('table.customerName')" prop="customerName" >
-              <el-input v-model="temp.customerName" :disabled="true"/>
+              <!-- <el-input v-model="temp.customerName" :disabled="true"/> -->
+              <span>{{ temp.customerName }}</span>
             </el-form-item>
             <el-form-item :label="$t('table.createdAt')" prop="createdAt" >
-              <el-input v-model="temp.createdAt" :disabled="true"/>
+              <!-- <el-input v-model="temp.createdAt" :disabled="true"/> -->
+              <span>{{ temp.createdAt }}</span>
             </el-form-item>
           </el-form>
         </div>
