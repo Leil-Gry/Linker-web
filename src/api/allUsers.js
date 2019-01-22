@@ -1,10 +1,9 @@
 import request from '@/utils/request'
 
-export function getAllUsersList(authorization) {
+export function getAllUsersList() {
   return request({
     url: '/user',
-    method: 'get',
-    headers: { authorization }
+    method: 'get'
   })
 }
 

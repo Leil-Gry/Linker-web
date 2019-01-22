@@ -258,5 +258,18 @@ export const asyncRouterMap = [
       }
     ]
   },
+  {
+    path: '/allData',
+    component: Layout,
+    meta: { roles: ['webAdmin', 'organizationAdmin'] },
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/allData/index'),
+        name: 'allData',
+        meta: { title: 'allData', icon: '设备' }
+      }
+    ]
+  },
   { path: '*', redirect: '/401', hidden: true }
 ]
