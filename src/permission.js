@@ -17,16 +17,17 @@ const whiteList = ['/login', '/auth-redirect']// no redirect whitelist
 
 router.beforeEach((to, from, next) => {
   NProgress.start() // start progress bar
-  if (getCookie('authToken')) { // determine if there has token
+  if (getCookie('authToken')) { // determine if there has token..如果用store中的token，刷新后就要重新登录，所以取cookie中的token，token在登录时同时设置到cookie和store，所以是永远一致的
     /* has token*/
     if (to.path == '/login') {
       next({ path: '/' })
       NProgress.done() // if current page is dashboard will not trigger	afterEach hook, so manually handle it
     } else {
-      if (store.getters.roles.length == 0) { // 判断当前用户是否已拉取完user_info信息
-        store.dispatch('GetUserRoles').then(res => { // 拉取user_info
-          const roles = res // note: roles must be a array! such as: ['editor','develop']
-          store.dispatch('GenerateRoutes', roles).then(() => { // 根据roles权限生成可访问的路由表
+      if (store.getters.roles == '') { // 判断当前用户是否已拉取完user_info信息
+        store.dispatch('GetUserInfo').then(res => { // 拉取user_info
+          var currentRoles = []
+          currentRoles = res // note: roles must be a array! such as: ['editor','develop']
+          store.dispatch('GenerateRoutes', currentRoles).then(() => { // 根据roles权限生成可访问的路由表
             router.addRoutes(store.getters.addRouters) // 动态添加可访问路由表
             next({ ...to, replace: true }) // hack方法 确保addRoutes已完成 ,set the replace: true so the navigation will not leave a history record
           })

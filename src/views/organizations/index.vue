@@ -101,9 +101,9 @@
       <el-collapse-transition>
         <div v-show="showOrgDetailFlag">
           <el-form label-position="left" label-width="90px" style="width: 400px; margin-left:50px;">
-            <el-form-item :label="$t('table.id')" prop="_id" >
+            <el-form-item :label="$t('table.id')" prop="id" >
               <!-- <el-input v-model="temp._id" :disabled="true"/> -->
-              <span>{{ temp._id }}</span>
+              <span>{{ temp.id }}</span>
             </el-form-item>
             <el-form-item :label="$t('table.creater')" prop="createdBy" >
               <!-- <el-input v-model="temp.createdBy" :disabled="true"/> -->
@@ -232,7 +232,7 @@
 </template>
 
 <script>
-import { getOrganizationList, deleteOrganization, updateOrganization, createOrganization, getOrgStaffList, createOrgStaff, updateOrgStaff, deleteOrgStaff } from '@/api/organizations'
+import { getOrganizationDetail, getOrganizationList, deleteOrganization, updateOrganization, createOrganization, getOrgStaffList, createOrgStaff, updateOrgStaff, deleteOrgStaff } from '@/api/organizations'
 import { getUserByEmail } from '@/api/search'
 import waves from '@/directive/waves' // 水波纹指令
 import { parseTime } from '@/utils'
@@ -291,11 +291,11 @@ export default {
       this.listLoading = true
       // console.log(this.$store.state.user.token)
       getOrganizationList(this.$store.state.user.token).then(response => {
-        if (response.data.status == '200') {
-          if (response.data.data == null) {
+        if (response.status == '200') {
+          if (response.data == null) {
             this.organizationListData = this.nullList
           } else {
-            this.organizationListData = response.data.data
+            this.organizationListData = response.data
           }
           this.listLoading = false
         } else {
@@ -411,8 +411,22 @@ export default {
         })
       })
     },
+    GetOrganizationDetail(row) {
+      getOrganizationDetail(row.id).then((response) => {
+        if (response.status == '200') {
+          this.temp = response.data
+        } else {
+          this.$notify.error({
+            title: response,
+            duration: 2000
+          })
+        }
+      })
+    },
     handleUpdate(row) {
-      this.temp = Object.assign({}, row) // copy obj
+      this.GetOrganizationDetail(row)
+      // this.temp = Object.assign({}, row) // copy obj
+      // console.log(this.temp)
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
       this.$nextTick(() => {

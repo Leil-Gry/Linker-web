@@ -1,11 +1,14 @@
-import { loginByEmail, getUserInfoById } from '@/api/login'
+import { loginByEmail, getMyInfoByAuthToken } from '@/api/login'
 import { getCookie, setCookie, removeCookie } from '@/utils/auth'
 import { Message } from 'element-ui'
 
 const user = {
   state: {
-    _id: '',
+    id: '',
     email: '',
+    nickname: '',
+    gender: '',
+    avatar: '',
     type: '',
     role: '',
     phone: '',
@@ -18,12 +21,13 @@ const user = {
     productCount: '',
     deviceCount: '',
     token: '',
-    roles: []
+    roles: [],
+    currentRoles: []
   },
 
   mutations: {
-    SET__ID: (state, _id) => {
-      state._id = _id
+    SET_ID: (state, id) => {
+      state.id = id
     },
     SET_EMAIL: (state, email) => {
       state.email = email
@@ -75,6 +79,18 @@ const user = {
     },
     SET_ROLES: (state, roles) => {
       state.roles = roles
+    },
+    SET_NICKNAME: (state, nickname) => {
+      state.nickname = nickname
+    },
+    SET_AVATAR: (state, avatar) => {
+      state.avatar = avatar
+    },
+    SET_GENDER: (state, gender) => {
+      state.gender = gender
+    },
+    SET_DEFAULTROLES: (state, currentRoles) => {
+      state.currentRoles = currentRoles
     }
   },
 
@@ -83,17 +99,16 @@ const user = {
     LoginByEmail({ commit }, userInfo) {
       const email = userInfo.email.trim()
       const password = userInfo.password
+      const captcha = userInfo.captcha
       return new Promise((resolve, reject) => {
-        loginByEmail(email, password).then(response => {
-          if (response.data.status == '0') {
-            // alert(response.data.msg)
-            const data = response.data.data
-            setCookie('authToken', data.token)// 在这里设置token到Cookie，通过Cookie里的token查用户信息，存到state里
-            setCookie('_id', data._id)// 以后不保存id，现在是不能通过token查，所以暂时用id查
+        loginByEmail(email, password, captcha).then(response => {
+          if (response.status == 200) {
+            setCookie('authToken', response.data.token)// 在这里设置token到Cookie，通过Cookie里的token查用户信息，存到state里
+            commit('SET_TOKEN', response.data.token)
             resolve()
           } else { // 不知道为什么全局方法无效，单独引用了message
             Message.error({
-              message: response.data.msg
+              message: response
             })
             reject()
           }
@@ -104,60 +119,60 @@ const user = {
     },
 
     // 获取用户权限等信息并保存在state
-    GetUserRoles({ commit, state }) {
+    GetUserInfo({ commit, state }) {
       return new Promise((resolve, reject) => {
-        getUserInfoById(getCookie('authToken'), getCookie('_id')).then(response => { // 以后用login接口的token查，不在Cookie存ID
+        getMyInfoByAuthToken().then(response => {
           if (!response.data) {
-            reject('error')
+            reject('获取用户信息错误')
           } else {
-            let roles
-            const data = response.data.data
-            switch (true) {
-              case data.role == '0' && data.type == '0' :
-                roles = ['webAdmin']; break
-              case data.role == '0' && data.type == '1' :
-                roles = ['organizationAdmin']; break
-              case data.role == '0' && data.type == '2' :
-                roles = ['customerAdmin']; break
-              case data.role == '1' && data.type == '1' :
-                roles = ['organizationStaff']; break
-              case data.role == '1' && data.type == '2' :
-                roles = ['customerStaff']; break
-              case data.role == '1' && data.type == '0' :// 其实并不存在这个权限
-                roles = ['temp']; break
+            var roles = []
+            var currentRoles = []
+            const data = response.data
+            for (var i = 0; i < data.roles.length; i++) {
+              switch (true) {
+                case data.roles[i].role == '1':
+                  roles[i] = ['webAdmin']; break
+                case data.roles[i].role == '21':
+                  roles[i] = ['organizationAdmin']; break
+                case data.roles[i].role == '31':
+                  roles[i] = ['customerAdmin']; break
+                case data.roles[i].role == '22':
+                  roles[i] = ['organizationStaff']; break
+                case data.roles[i].role == '32':
+                  roles[i] = ['customerStaff']; break
+              }
             }
-            if (data.orgCount == undefined) { // 现在的API不返回0，手动设置为0
-              data.orgCount = 0
-            }
-            if (data.customerCount == undefined) {
-              data.customerCount = 1
-            }
-            if (data.productCount == undefined) {
-              data.productCount = 0
-            }
-            if (data.deviceCount == undefined) {
-              data.deviceCount = 0
-            }
+            if (getCookie('changedCurrentRoles')) {
+              currentRoles[0] = (getCookie('changedCurrentRoles'))// 多权限用户，选择过其他的权限则会在cookie暂存，如果暂存中没有，则用传过来的数组第一个
+            } else currentRoles = roles[0] // 默认登录权限为第一个
+
             // 拉取到信息后设置state
+            commit('SET_ID', data.id)
             commit('SET_EMAIL', data.email)
-            commit('SET_TYPE', data.type)// 0:Admin,1:Organization,2:customer
-            commit('SET_ROLE', data.role)// 0:Admin,1:user
             commit('SET_PHONE', data.phone)
-            commit('SET_FULLNAME', data.fullname)
-            commit('SET_CREATEDBY', data.createdBy)
-            commit('SET_CREATEDNAME', data.createdName)
+            commit('SET_NICKNAME', data.nickname)
+            commit('SET_FULLNAME', data.fullName)
+            commit('SET_GENDER', data.gender)
+            commit('SET_AVATAR', data.avatar)
+
             commit('SET_ORGANIZATIONID', data.organizationId)
-            commit('SET_ORGANIZATIONNAME', data.organizationName)
             commit('SET_CUSTOMERID', data.customerId)
-            commit('SET_CUSTOMERNAME', data.customerName)
-            commit('SET_ORGCOUNT', data.orgCount)
-            commit('SET_CUSTOMERCOUNT', data.customerCount)
-            commit('SET_PRODUCTCOUNT', data.productCount)
-            commit('SET_DEVICECOUNT', data.deviceCount)
-            commit('SET_TOKEN', getCookie('authToken'))
-            commit('SET__ID', data._id)
             commit('SET_ROLES', roles)
-            resolve(roles)
+
+            commit('SET_DEFAULTROLES', currentRoles)
+
+            // commit('SET_CREATEDBY', data.createdBy)
+            // commit('SET_CREATEDNAME', data.createdName)
+            // commit('SET_ORGANIZATIONNAME', data.organizationName)
+            // commit('SET_CUSTOMERNAME', data.customerName)
+            // commit('SET_ORGCOUNT', data.orgCount)
+            // commit('SET_CUSTOMERCOUNT', data.customerCount)
+            // commit('SET_PRODUCTCOUNT', data.productCount)
+            // commit('SET_DEVICECOUNT', data.deviceCount)
+            // commit('SET_TOKEN', getCookie('authToken'))
+            // commit('SET_TYPE', data.type)// 0:Admin,1:Organization,2:customer
+            // commit('SET_ROLE', data.role)// 0:Admin,1:user
+            resolve(currentRoles)
           }
         }).catch(error => {
           reject(error)
@@ -171,7 +186,7 @@ const user = {
         commit('SET_TOKEN', '')
         commit('SET_ROLES', [])
         removeCookie('authToken')
-        removeCookie('_id')
+        removeCookie('changedCurrentRoles')
         resolve()
       })
     }

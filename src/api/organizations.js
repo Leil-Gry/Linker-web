@@ -23,11 +23,10 @@ export function updateOrganization(authorization, id, data) {
     data
   })
 }
-export function getOrganizationList(authorization) {
+export function getOrganizationList() {
   return request({
     url: '/organization',
-    method: 'get',
-    headers: { authorization }
+    method: 'get'
   })
 }
 
@@ -59,6 +58,13 @@ export function getOrgStaffList(authorization, orgId) {
     url: '/organization/' + orgId + '/user',
     method: 'get',
     headers: { authorization }
+  })
+}
+
+export function getOrganizationDetail(orgId) {
+  return request({
+    url: '/organization/' + orgId,
+    method: 'get'
   })
 }
 

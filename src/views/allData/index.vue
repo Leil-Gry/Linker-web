@@ -42,7 +42,7 @@
         </el-form-item>
         <!-- 数据项条数 -->
         <!-- 选择时间 -->
-        <el-form-item label="时间段:" prop="date">
+        <el-form-item label="时间段:" prop="dateRange">
           <el-row>
             <el-date-picker
               v-model="dateRange"
@@ -103,7 +103,7 @@ export default {
         dateBegin: '',
         dateEnd: ''
       },
-      dateRange: [],
+      dateRange: '',
       UIEOptions: UIEOptions,
       DataOptions: DataOptions,
       rules: {
@@ -115,11 +115,8 @@ export default {
           { required: true, message: '请选择至少一个用户UIE', trigger: 'change' }
           // {validator: validDataItem, trigger: 'change'}
         ],
-        dateBegin: [
-          { type: 'string', required: true, message: '请选择开始时间', trigger: 'change' }
-        ],
-        dateEnd: [
-          { type: 'string', required: true, message: '请选择结束时间', trigger: 'change' }
+        dateRange: [
+          { required: true, message: '请选择时间范围', trigger: 'change' }
         ]
       },
       optioncheck: 0, // option set is done
@@ -244,9 +241,6 @@ export default {
     this.init()
   },
   methods: {
-    test() {
-      console.log(this.value5)
-    },
     init() {
       this.chart = echarts.init(document.getElementById(this.id))
       this.chart.setOption(this.option)
@@ -331,6 +325,7 @@ export default {
     },
     resetForm(formName) {
       this.$refs[formName].resetFields()
+      this.dateRange = ''
     }
   }
 }

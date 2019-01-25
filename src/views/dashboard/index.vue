@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard-container">
     <div class="dashboardTips">
-      <span class="roles">{{ this.$store.state.user.roles[0] }}</span>
+      <span class="roles">{{ this.$store.state.user.currentRoles[0] }}</span>
       <span class="fullname">{{ this.$store.state.user.fullname }}</span>
     </div>
     <img src="https://wpimg.wallstcn.com/0e03b7da-db9e-4819-ba10-9016ddfdaed3" class="emptyGif">

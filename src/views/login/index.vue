@@ -39,6 +39,22 @@
           <svg-icon icon-class="eye" />
         </span>
       </el-form-item>
+      <el-form-item v-show="captchaShowFlag" id="captcha" prop="captcha">
+        <div class="v-center">
+          <el-input
+            v-model="loginForm.captcha"
+            :placeholder="$t('login.captcha')"
+            name="captcha"
+            type="text"
+          />
+          <img
+            :src= "captchaUrl"
+            class="captcha-img"
+            type= "image"
+            @click="setNewCaptcha"
+          >
+        </div>
+      </el-form-item>
       <el-button
         :loading="loading"
         type="primary"
@@ -67,21 +83,36 @@ export default {
       }
     }
     const isvalidatePassword = (rule, value, callback) => {
-      callback()
+      if (value == '') {
+        callback(new Error('请输入密码'))
+      } else {
+        callback()
+      }
+    }
+    const isvalidateCaptcha = (rule, value, callback) => {
+      if (value == '' && this.captchaShowFlag) {
+        callback(new Error('请输入验证码'))
+      } else {
+        callback()
+      }
     }
     return {
       loginForm: {
-        email: '123@qq.com',
-        password: '12'
+        email: 'multi@dev.com',
+        password: '123456',
+        captcha: ''
       },
       loginRules: {
         email: [{ required: true, trigger: 'blur', validator: isvalidateEmail }],
-        password: [{ required: true, trigger: 'blur', validator: isvalidatePassword }]
+        password: [{ required: true, trigger: 'blur', validator: isvalidatePassword }],
+        captcha: [{ required: this.captchaShowFlag, trigger: 'blur', validator: isvalidateCaptcha }]
       },
       passwordType: 'password',
       loading: false,
       showDialog: false,
-      redirect: undefined
+      redirect: undefined,
+      captchaShowFlag: false,
+      captchaUrl: ''
     }
   },
   watch: {
@@ -114,14 +145,46 @@ export default {
           this.$store.dispatch('LoginByEmail', this.loginForm).then(() => {
             this.loading = false
             this.$router.push({ path: this.redirect || '/' })
-          }).catch(() => {
+          }).catch(error => {
+            if (error.response.status == 400) { // 显示验证码
+              this.setCaptcha(error.response.data)
+              this.loginForm.captcha = ''
+              this.captchaShowFlag = true
+            } else if (error.response.status == 401) {
+              this.$message.error({
+                message: '用户名或密码错误，登录失败'
+              })
+              this.loginForm.password = ''
+              this.loginForm.captcha = ''
+              this.captchaShowFlag = false
+            } else if (error.response.status == 429) {
+              this.$message.error({
+                message: '登录失败次数过多，请稍候再试'
+              })
+              this.loginForm.captcha = ''
+              this.captchaShowFlag = false
+            }
             this.loading = false
           })
         } else {
-          this.$message.error({
-            message: 'error submit!!'
-          })
           return false
+        }
+      })
+    },
+    setCaptcha(baseImgUrl) {
+      this.captchaUrl = 'data:image/png;base64,' + baseImgUrl
+      console.log(this.captchaUrl)
+    },
+    setNewCaptcha() {
+      this.loginForm.captcha = ''// 置空防止已经输入验证码的时候点击刷新会提交输入的值
+      this.$store.dispatch('LoginByEmail', this.loginForm).then(() => {
+      }).catch(error => {
+        if (error.response.status == 400) { // 400则正常，更新验证码
+          this.setCaptcha(error.response.data)
+        } else {
+          this.$message.error({
+            message: '更新验证码错误，请检查用户名密码'
+          })
         }
       })
     }
@@ -241,6 +304,15 @@ $light_gray:#eee;
     position: absolute;
     right: 35px;
     bottom: 28px;
+  }
+  .captcha-img {
+    width: 70%;
+    float: left;
+  }
+  .v-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 </style>

@@ -75,16 +75,15 @@ export default {
     github: '项目地址',
     screenfull: '全屏',
     theme: '换肤',
-    size: '布局大小'
+    size: '布局大小',
+    changeRoles: '切换权限'
   },
   login: {
     title: '登录',
     logIn: '登录',
-    username: '账号',
     password: '密码',
-    any: '随便填',
-    thirdparty: '第三方登录',
-    thirdpartyTips: '本地不能模拟，请结合自己业务进行模拟！！！'
+    email: '邮箱',
+    captcha: '验证码'
   },
   documentation: {
     documentation: '文档',

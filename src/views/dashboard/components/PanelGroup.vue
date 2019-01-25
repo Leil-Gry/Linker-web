@@ -70,17 +70,17 @@ export default {
       this.$router.push({ path: '/' + url + '/index' })
     },
     showOrgButton() {
-      if (this.$store.state.user.roles == 'webAdmin') { // webadmin显示组织按钮
+      if (this.$store.state.user.currentRoles == 'webAdmin') { // webadmin显示组织按钮
         return true
       } else return false
     },
     showCusButton() {
-      if (this.$store.state.user.roles == 'webAdmin' || this.$store.state.user.type == 1) { // webadmin和组织管理员、组织成员显示客户按钮
+      if (this.$store.state.user.currentRoles == 'webAdmin' || this.$store.state.user.type == 1) { // webadmin和组织管理员、组织成员显示客户按钮
         return true
       } else return false
     },
     buttonWidth() {
-      if (this.$store.state.user.roles == 'webAdmin') { // 四个按钮
+      if (this.$store.state.user.currentRoles == 'webAdmin') { // 四个按钮
         return 6
       } else if (this.$store.state.user.type == 1) { // 三个按钮
         return 8
