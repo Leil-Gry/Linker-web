@@ -1,10 +1,9 @@
 import request from '@/utils/request'
 
-export function createCustomer(authorization, data) {
+export function createCustomer(proId, data) {
   return request({
-    url: '/customer',
+    url: '/product/' + proId + '/customer',
     method: 'post',
-    headers: { authorization },
     data
   })
 }
@@ -23,12 +22,18 @@ export function updateCustomer(authorization, id, data) {
     data
   })
 }
-export function getCustomerList(orgId, authorization) { // 得到org下面的customer
-  return request({
-    url: '/organization/' + orgId + '/customer',
-    method: 'get',
-    headers: { authorization }
-  })
+export function getCustomerList(proId, page, size) { // 得到org下面的customer
+  if (page && size) {
+    return request({
+      url: '/customer?productId=' + proId + '&&page=' + page + '&&size=' + size,
+      method: 'get'
+    })
+  } else {
+    return request({
+      url: '/customer?productId=' + proId + '&&page=1&&size=10',
+      method: 'get'
+    })
+  }
 }
 
 export function getAllCustomerList(authorization) { // 得到所有customer，仅限webadmin

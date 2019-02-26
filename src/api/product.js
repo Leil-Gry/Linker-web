@@ -1,49 +1,55 @@
 import request from '@/utils/request'
 
-export function createProduct(authorization, data) {
+export function createProduct(data) {
   return request({
     url: '/product',
     method: 'post',
-    headers: { authorization },
     data
   })
 }
-export function deleteProduct(authorization, id) {
+export function deleteProduct(id) {
   return request({
     url: '/product/' + id,
-    method: 'delete',
-    headers: { authorization }
+    method: 'delete'
   })
 }
-export function updateProduct(authorization, id, data) {
+export function updateProduct(id, data) {
   return request({
     url: '/product/' + id,
     method: 'put',
-    headers: { authorization },
     data
   })
 }
-export function getProductListByOrg(authorization, orgId) { // 得到org下面的product
-  return request({
-    url: '/organization/' + orgId + '/product',
-    method: 'get',
-    headers: { authorization }
-  })
+export function getProductListByOrg(orgId, page, size, status) { // 得到org下面的product
+  if (status) {
+    return request({
+      url: '/product?organizationId=' + orgId + '&&page=' + page + '&&size=' + size + '&&status=' + status,
+      method: 'get'
+    })
+  } else if (page && size) {
+    return request({
+      url: '/product?organizationId=' + orgId + '&&page=' + page + '&&size=' + size,
+      method: 'get'
+    })
+  } else {
+    return request({
+      url: '/product?organizationId=' + orgId + '&&page=1&&size=10',
+      method: 'get'
+    })
+  }
 }
 
-export function getProductListByCus(authorization, cusId) { // 得到cus下面的product
+// export function getProductListByCus(authorization, cusId) { // 得到cus下面的product
+//   return request({
+//     url: '/customer/' + cusId + '/product',
+//     method: 'get',
+//     headers: { authorization }
+//   })
+// }
+
+export function getProductDetail(id) { // 得到所有product，仅限webadmin
   return request({
-    url: '/customer/' + cusId + '/product',
-    method: 'get',
-    headers: { authorization }
+    url: '/product/' + id,
+    method: 'get'
   })
 }
-
-export function getAllProductList(authorization) { // 得到所有product，仅限webadmin
-  return request({
-    url: '/product',
-    method: 'get',
-    headers: { authorization }
-  })
-}
-

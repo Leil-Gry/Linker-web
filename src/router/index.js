@@ -77,7 +77,8 @@ export const asyncRouterMap = [
         component: () => import('@/views/svg-icons/index'),
         name: 'Icons',
         meta: {
-          title: 'icons', icon: 'icon', noCache: true }
+          title: 'icons', icon: 'icon', noCache: true
+        }
       }
     ]
   },
@@ -191,27 +192,13 @@ export const asyncRouterMap = [
     path: '/organizations',
     component: Layout,
     redirect: 'noredirect',
-    meta: { roles: ['webAdmin', 'temp'] },
+    meta: { roles: ['webAdmin', 'organizationAdmin', 'organizationStaff'] },
     children: [
       {
         path: 'index',
         component: () => import('@/views/organizations/index'),
         name: 'organizations',
         meta: { title: 'organizations', icon: '组织' }
-      }
-    ]
-  },
-  {
-    path: '/customers',
-    component: Layout,
-    redirect: 'noredirect',
-    meta: { roles: ['webAdmin', 'organizationAdmin', 'organizationStaff'] },
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/customers/index'),
-        name: 'customers',
-        meta: { title: 'customers', icon: '客户' }
       }
     ]
   },
@@ -226,6 +213,21 @@ export const asyncRouterMap = [
         component: () => import('@/views/products/index'),
         name: 'products',
         meta: { title: 'products', icon: '产品' }
+      }
+    ]
+  },
+  {
+    path: '/customers',
+    component: Layout,
+    redirect: 'noredirect',
+    hidden: true,
+    meta: { roles: ['webAdmin', 'organizationAdmin', 'organizationStaff'] },
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/customers/index'),
+        name: 'customers',
+        meta: { title: 'customers', icon: '客户' }
       }
     ]
   },

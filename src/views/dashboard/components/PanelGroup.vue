@@ -98,6 +98,7 @@ export default {
     margin-bottom: 32px;
   }
   .card-panel {
+    margin: 0 15px;
     border-radius: 10px;
     height: 108px;
     cursor: pointer;
@@ -112,6 +113,7 @@ export default {
       .card-panel-icon-wrapper {
         color: rgb(28, 85, 117);
       }
+      box-shadow: 4px 4px 40px rgba(0, 0, 0, .2);
 
     }
     .card-panel-icon-wrapper {

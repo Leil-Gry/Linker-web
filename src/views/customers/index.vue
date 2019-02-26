@@ -284,64 +284,26 @@ export default {
     }
   },
   created() {
-    this.GetCustomerList(this.$route.query.organizationID)
+    this.GetCustomerList(this.$route.query.productID)
   },
   methods: {
-    GetCustomerList(orgId) {
-      if (orgId) {
-        this.listLoading = true
-        getCustomerList(orgId, this.$store.state.user.token).then(response => { // 如果url中有orgID，则优先根据查询id
-          if (response.data.status == '200') {
-            if (response.data.data == null) {
-              this.customerListData = this.nullList
-            } else {
-              this.customerListData = response.data.data
-            }
-            this.listLoading = false
+    GetCustomerList(proId, page, size) {
+      this.listLoading = true
+      getCustomerList(proId).then(response => {
+        if (response.status == 200) {
+          if (response.data == null) {
+            this.customerListData = this.nullList
           } else {
-            this.$message.error({
-              message: response.data.msg
-            })
-            this.listLoading = false
+            this.customerListData = response.data
           }
-        })
-      } else {
-        if (this.$store.state.user.roles == 'webAdmin') { // url没有id但是是webadmin，查所有
-          this.listLoading = true
-          getAllCustomerList(this.$store.state.user.token).then(response => {
-            if (response.data.status == '200') {
-              if (response.data.data == null) {
-                this.customerListData = this.nullList
-              } else {
-                this.customerListData = response.data.data
-              }
-              this.listLoading = false
-            } else {
-              this.$message.error({
-                message: response.data.msg
-              })
-              this.listLoading = false
-            }
+          this.listLoading = false
+        } else {
+          this.$message.error({
+            message: response
           })
-        } else { // 没有id 不是webadmin，查自己所属的org
-          this.listLoading = true
-          getCustomerList(this.$store.state.user.organizationId, this.$store.state.user.token).then(response => {
-            if (response.data.status == '200') {
-              if (response.data.data == null) {
-                this.customerListData = this.nullList
-              } else {
-                this.customerListData = response.data.data
-              }
-              this.listLoading = false
-            } else {
-              this.$message.error({
-                message: response.data.msg
-              })
-              this.listLoading = false
-            }
-          })
+          this.listLoading = false
         }
-      }
+      })
     },
     DeleteCustomer(row) {
       if (row.memberCount > 0) {
@@ -400,19 +362,12 @@ export default {
       this.showCusDetailFlag = false
     },
     handleCreate() {
-      if (this.$store.state.user.roles != 'organizationAdmin') {
-        this.$alert('请使用组织管理员帐号添加客户', '拒绝添加', {
-          cancelButtonText: '关闭',
-          type: 'info'
-        })
-      } else {
-        this.resetTemp()
-        this.dialogStatus = 'create'
-        this.dialogFormVisible = true
-        this.$nextTick(() => {
-          this.$refs['dataForm'].clearValidate()
-        })
-      }
+      this.resetTemp()
+      this.dialogStatus = 'create'
+      this.dialogFormVisible = true
+      this.$nextTick(() => {
+        this.$refs['dataForm'].clearValidate()
+      })
     },
     CreateCustomer() {
       this.$confirm('将创建该客户, 是否继续?', '创建', {
@@ -422,22 +377,18 @@ export default {
       }).then(() => {
         this.$refs['dataForm'].validate((valid) => {
           if (valid) {
-            this.temp.createdBy = this.$store.state.user._id// 创建人
-            this.temp.createdName = this.$store.state.user.fullname// 创建人
-            this.temp.organizationId = this.$store.state.user.organizationId// 所属组织
-            this.temp.organizationName = this.$store.state.user.organizationName// 所属组织
-            createCustomer(this.$store.state.user.token, this.temp).then((response) => {
-              if (response.data.status == '200') {
+            createCustomer(this.$route.query.productID, this.temp).then((response) => {
+              if (response.status == 201) {
                 this.dialogFormVisible = false
-                this.GetCustomerList(this.$route.query.organizationID)
+                this.GetCustomerList(this.$route.query.productID)
                 this.$notify({
-                  title: response.data.msg,
+                  title: response.data,
                   type: 'success',
                   duration: 2000
                 })
               } else {
                 this.$notify.error({
-                  title: response.data.msg,
+                  title: response.data,
                   duration: 2000
                 })
               }

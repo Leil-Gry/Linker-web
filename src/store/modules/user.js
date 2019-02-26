@@ -22,7 +22,8 @@ const user = {
     deviceCount: '',
     token: '',
     roles: [],
-    currentRoles: []
+    currentRoles: [],
+    currentRelatedId: ''
   },
 
   mutations: {
@@ -91,6 +92,9 @@ const user = {
     },
     SET_DEFAULTROLES: (state, currentRoles) => {
       state.currentRoles = currentRoles
+    },
+    SET_CURRENTRELATEDID: (state, currentRelatedId) => {
+      state.currentRelatedId = currentRelatedId
     }
   },
 
@@ -127,6 +131,7 @@ const user = {
           } else {
             var roles = []
             var currentRoles = []
+            var currentRelatedId = ''
             const data = response.data
             for (var i = 0; i < data.roles.length; i++) {
               switch (true) {
@@ -142,9 +147,18 @@ const user = {
                   roles[i] = ['customerStaff']; break
               }
             }
+            for (var i = 0; i < data.roles.length; i++) {
+              roles[i].push(data.roles[i].identity)
+            } // 权限在二维数组第一个，第二个是id
             if (getCookie('changedCurrentRoles')) {
+              currentRelatedId = (getCookie('currentRelatedId'))
               currentRoles[0] = (getCookie('changedCurrentRoles'))// 多权限用户，选择过其他的权限则会在cookie暂存，如果暂存中没有，则用传过来的数组第一个
-            } else currentRoles = roles[0] // 默认登录权限为第一个
+            } else { // 默认登录权限为第一个
+              setCookie('changedCurrentRoles', roles[0][0])
+              setCookie('currentRelatedId', roles[0][1])
+              currentRoles = roles[0]
+              currentRelatedId = roles[0][1]
+            }
 
             // 拉取到信息后设置state
             commit('SET_ID', data.id)
@@ -160,6 +174,7 @@ const user = {
             commit('SET_ROLES', roles)
 
             commit('SET_DEFAULTROLES', currentRoles)
+            commit('SET_CURRENTRELATEDID', currentRelatedId)
 
             // commit('SET_CREATEDBY', data.createdBy)
             // commit('SET_CREATEDNAME', data.createdName)
@@ -187,6 +202,7 @@ const user = {
         commit('SET_ROLES', [])
         removeCookie('authToken')
         removeCookie('changedCurrentRoles')
+        removeCookie('currentRelatedId')
         resolve()
       })
     }

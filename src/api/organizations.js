@@ -1,63 +1,69 @@
 import request from '@/utils/request'
 
-export function createOrganization(authorization, data) {
+export function createOrganization(data) {
   return request({
     url: '/organization',
     method: 'post',
-    headers: { authorization },
     data
   })
 }
-export function deleteOrganization(authorization, id) {
+export function deleteOrganization(id) {
   return request({
     url: '/organization/' + id,
-    method: 'delete',
-    headers: { authorization }
+    method: 'delete'
   })
 }
-export function updateOrganization(authorization, id, data) {
+export function updateOrganization(id, data) {
   return request({
     url: '/organization/' + id,
     method: 'put',
-    headers: { authorization },
     data
   })
 }
-export function getOrganizationList() {
-  return request({
-    url: '/organization',
-    method: 'get'
-  })
+export function getOrganizationList(page, size, name) {
+  if (name) {
+    return request({
+      url: '/organization?page=' + page + '&&size=' + size + '&&name=' + name,
+      method: 'get'
+    })
+  } else if (page && size) {
+    return request({
+      url: '/organization?page=' + page + '&&size=' + size,
+      method: 'get'
+    })
+  } else { // 啥都没有
+    return request({
+      url: '/organization?page=1&&size=10', // 默认size是10
+      method: 'get'
+    })
+  }
 }
 
-export function createOrgStaff(authorization, data) {
+export function createOrgStaff(data) {
   return request({
     url: '/user',
     method: 'post',
-    headers: { authorization },
     data
   })
 }
-export function deleteOrgStaff(authorization, id) {
+export function deleteOrgStaff(id, data) {
   return request({
     url: '/user/' + id,
     method: 'delete',
-    headers: { authorization }
-  })
-}
-export function updateOrgStaff(authorization, id, data) {
-  return request({
-    url: '/user/' + id,
-    method: 'put',
-    headers: { authorization },
     data
   })
 }
-export function getOrgStaffList(authorization, orgId) {
+export function updateOrgStaff(id, data) {
   return request({
-    url: '/organization/' + orgId + '/user',
-    method: 'get',
-    headers: { authorization }
+    url: '/user/' + id,
+    method: 'put',
+    data
+  })
+}
+export function getOrgStaffList(orgId) {
+  return request({
+    url: '/user?organizationId=' + orgId,
+    method: 'get'
   })
 }
 

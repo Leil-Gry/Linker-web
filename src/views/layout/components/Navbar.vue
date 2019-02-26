@@ -53,16 +53,16 @@
     <div>
       <el-dialog
         :visible.sync="changeRolesdialogVisible"
-        title= "切换权限"
+        :title="$t('navbar.changeRoles')"
         width="50%">
         <el-row class="panel-group">
-          <el-col v-for="item in allRoles" :xs="12" :sm="12" :lg="12" :key="item" class="card-panel-col" >
+          <el-col v-for="item in allRoles" :xs="12" :sm="12" :lg="12" class="card-panel-col" >
             <div class="card-panel" @click="changeCurrentRoles(item)">
               <div class="card-panel-icon-wrapper">
                 <svg-icon icon-class="客户" class-name="card-panel-icon" />
               </div>
               <div class="card-panel-description">
-                <div class="card-panel-text">{{ item }}</div>
+                <div class="card-panel-text">{{ item[0] }}</div>
               </div>
             </div>
           </el-col>
@@ -97,7 +97,10 @@ export default {
   data() {
     return {
       changeRolesdialogVisible: false,
-      allRoles: []
+      allRoles: [{
+        role: '',
+        identity: ''
+      }]
     }
   },
   computed: {
@@ -119,19 +122,20 @@ export default {
     },
     handleChangeCurrentRoles() {
       for (var i = 0; i < this.$store.state.user.roles.length; i++) { // 二维数组转一维数组，不知道为什么存的时候只能存二维，如果存一维的话，.some()函数用不了
-        this.allRoles[i] = this.$store.state.user.roles[i][0]
+        this.allRoles[i] = this.$store.state.user.roles[i]
       }
       this.changeRolesdialogVisible = true
     },
     changeCurrentRoles(selectRole) {
       var tempRole = []
-      tempRole[0] = selectRole
+      tempRole[0] = selectRole[0]
       this.$store.dispatch('GenerateRoutes', tempRole).then(() => { // 根据roles权限生成可访问的路由表
         router.addRoutes(this.$store.getters.addRouters) // 动态添加可访问路由表
       })
       this.changeRolesdialogVisible = false
       this.$store.state.user.currentRoles = tempRole
-      setCookie('changedCurrentRoles', selectRole)
+      setCookie('changedCurrentRoles', selectRole[0])
+      setCookie('currentRelatedId', selectRole[1])
       router.push({
         path: '/'
       })
@@ -210,6 +214,7 @@ export default {
     margin-bottom: 32px;
   }
   .card-panel {
+    margin: 0 15px;
     border-radius: 10px;
     height: 108px;
     cursor: pointer;
@@ -224,6 +229,7 @@ export default {
       .card-panel-icon-wrapper {
         color: rgb(28, 85, 117);
       }
+      box-shadow: 4px 4px 40px rgba(0, 0, 0, .2);
 
     }
     .card-panel-icon-wrapper {
@@ -244,7 +250,7 @@ export default {
       margin-left: 0px;
       .card-panel-text {
         text-align: right;
-        line-height: 18px;
+        // line-height: 18px;
         color:#666;
         font-size: 16px;
         margin-bottom: 12px;

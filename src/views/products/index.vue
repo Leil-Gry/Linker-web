@@ -1,145 +1,278 @@
 <template>
   <div class="app-container">
-    <div class="filter-container">
-      <!-- TODO -->
-      <el-input :placeholder="$t('table.productName')" v-model="temp.name" clearable style="width: 200px;" class="filter-item" />
-      <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" >{{ $t('table.search') }}</el-button>
-      <el-button v-if="this.$store.state.user.role == 0" class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">{{ $t('table.createProduct') }}</el-button>
-      <el-button v-if="productListData.length>0" class="filter-item" style="margin-left: 10px;" type="primary" icon="document" @click="handleExport">{{ $t('excel.export') }} Excel</el-button>
-
-    </div>
-    <el-table
-      v-loading="listLoading"
-      :key="tableKey"
-      :data="productListData"
-      border
-      fit
-      highlight-current-row
-      style="width: 100%;">
-      <el-table-column :label="$t('table.productName')" min-width="150px">
-        <template slot-scope="scope">
-          <span class="link-type" @click="handleUpdate(scope.row)">{{ scope.row.name }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="$t('table.customerName')" min-width="150px">
-        <template slot-scope="scope">
-          <span >{{ scope.row.customerName }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="$t('table.organizationName')" min-width="150px">
-        <template slot-scope="scope">
-          <span >{{ scope.row.organizationName }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="$t('table.countDevices')" align="center" width="95">
-        <template slot-scope="scope">
-          <span v-if="scope.row.countDevices" class="link-type" @click="jumpRouter('devices','?organizationID='+scope.row.organizationId+'&customerID='+scope.row.customerId+'&productID='+scope.row._id)">{{ scope.row.countDevices }}</span>
-          <span v-else class="link-type" @click="jumpRouter('devices','?organizationID='+scope.row.organizationId+'&customerID='+scope.row.customerId+'&productID='+scope.row._id)">0</span>
-        </template>
-      </el-table-column>
-      <el-table-column v-if="this.$store.state.user.role == 0" :label="$t('table.actions')" align="center" width="90" class-name="small-padding fixed-width">
-        <template slot-scope="scope">
-          <!--删除按钮-->
-          <el-button size="mini" type="danger" icon="el-icon-delete" @click="DeleteProduct(scope.row)"/>
-        </template>
-      </el-table-column>
-    </el-table>
-
-    <!-- 分页 -->
-    <!-- TODO -->
-    <div class="pagination-container">
-      <el-pagination v-if="productListData.length > 0" :page-sizes="5" :total="productListData.length" background layout="total, prev, pager, next, jumper" />
-    </div>
+    <el-container>
+      <el-aside v-show="showSideSelect" style="height: 700px;margin-right: 10px">
+        <el-input
+          :placeholder="$t('table.organizationName')"
+          v-model="searchOrgName"
+          clearable
+          style="width: 200px;"
+          class="filter-item"
+        />
+        <el-button
+          v-waves
+          class="filter-item"
+          type="primary"
+          icon="el-icon-search"
+          @click="handleSearchOrg"
+        />
+        <el-menu class="el-menu-vertical-demo">
+          <el-menu-item v-for="org in organizationListData" index="2" @click="selectOrg(org.id)">
+            <span slot="title">{{ org.name }}</span>
+          </el-menu-item>
+          <!-- Org分页 -->
+          <div class="pagination-container">
+            <el-button
+              v-loading="listLoading"
+              v-if="showMoreOrgButtonFlag"
+              style="width:100%"
+              icon="el-icon-arrow-down"
+              @click="showMoreOrg"
+            >更多</el-button>
+            <el-button
+              v-if="!showMoreOrgButtonFlag"
+              style="width:100%"
+              icon="el-icon-arrow-up"
+              @click="showLessOrg"
+            >收起</el-button>
+          </div>
+        </el-menu>
+      </el-aside>
+      <el-col>
+        <el-row :span="showSideSelect?18:24">
+          <div class="filter-container">
+            <el-button
+              v-if="this.$store.state.user.currentRoles == 'webAdmin' && this.selectOrgId"
+              class="filter-item"
+              style="margin-left: 10px;"
+              type="primary"
+              icon="el-icon-edit"
+              @click="handleCreate"
+            >{{ $t('table.createProduct') }}</el-button>
+            <!-- <el-button
+              v-if="productListData.length>0"
+              class="filter-item"
+              style="margin-left: 10px;"
+              type="primary"
+              icon="document"
+              @click="handleExport"
+            >{{ $t('excel.export') }} Excel</el-button> -->
+            <el-radio-group v-if="this.selectOrgId" v-model="searchStatus" size="primary" class="filter-item" @change="handleFilterPro">
+              <el-radio-button label="1">运营中</el-radio-button>
+              <el-radio-button label="3">已停止</el-radio-button>
+              <el-radio-button label="2">已删除</el-radio-button>
+              <el-radio-button label="">全部</el-radio-button>
+            </el-radio-group>
+            <el-table
+              v-loading="listLoading"
+              :key="tableKey"
+              :data="productListData"
+              border
+              fit
+              highlight-current-row
+              style="width: 100%;"
+              empty-text="暂无数据，或未选择组织"
+            >
+              <el-table-column :label="$t('table.productName')" min-width="150px">
+                <template slot-scope="scope">
+                  <span class="link-type" @click="handleUpdate(scope.row)">{{ scope.row.name }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column :label="$t('table.description')" min-width="150px">
+                <template slot-scope="scope">
+                  <span>{{ scope.row.description }}</span>
+                </template>
+              </el-table-column>
+              <!-- 状态显示 -->
+              <el-table-column :label="$t('table.status')" width="95px" align="center">
+                <template slot-scope="scope">
+                  <el-tag v-if="scope.row.status == '1'">运营中</el-tag>
+                  <el-tag v-else-if="scope.row.status == '2'" type="info">已删除</el-tag>
+                  <el-tag v-else-if="scope.row.status == '3'" type="danger">已停止</el-tag>
+                  <el-tag v-else type="warning">未知状态</el-tag>
+                </template>
+              </el-table-column>
+              <!-- 管理客户按钮 -->
+              <el-table-column
+                v-if="this.$store.state.user.currentRoles == 'webAdmin'"
+                :label="$t('table.countCustomer')"
+                align="center"
+                width="95"
+              >
+                <template slot-scope="scope">
+                  <el-button
+                    size="mini"
+                    type="primary"
+                    @click="jumpRouter('customers','?productID='+scope.row.id)"
+                  >{{ $t('table.adminCustomer') }}</el-button>
+                </template>
+              </el-table-column>
+              <!--删除按钮-->
+              <el-table-column
+                v-if="this.$store.state.user.currentRoles == 'webAdmin'"
+                :label="$t('table.actions')"
+                align="center"
+                width="90"
+                class-name="small-padding fixed-width"
+              >
+                <template slot-scope="scope">
+                  <el-button
+                    v-if="scope.row.status != '2'"
+                    size="mini"
+                    type="danger"
+                    icon="el-icon-delete"
+                    @click="DeleteProduct(scope.row)"
+                  />
+                </template>
+              </el-table-column>
+            </el-table>
+          </div>
+          <!-- pro分页 -->
+          <div v-if="this.selectOrgId && this.productListData.length > 0" class="pagination-container">
+            <el-button
+              v-loading="listLoading"
+              v-if="showMoreProButtonFlag"
+              style="width:100%"
+              icon="el-icon-arrow-down"
+              @click="showMorePro"
+            >更多</el-button>
+            <el-button
+              v-if="!showMoreProButtonFlag"
+              style="width:100%"
+              icon="el-icon-arrow-up"
+              @click="showLessPro"
+            >收起</el-button>
+          </div>
+        </el-row>
+      </el-col>
+    </el-container>
 
     <!--product编辑框-->
-    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
+    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" width="700px">
       <el-form
         ref="dataForm"
         :rules="rules"
         :model="temp"
         label-position="left"
         label-width="90px"
-        style="width: 400px; margin-left:50px;">
+        style="width: 400px; margin-left:50px;"
+      >
         <el-form-item :label="$t('table.productName')" prop="name">
-          <el-input v-model="temp.name" :disabled="!(this.$store.state.user.role == 0) || dialogStatus !='create' " clearable autofocus/>
+          <el-input v-model="temp.name" :disabled="dialogStatus !='create' " clearable autofocus/>
+        </el-form-item>
+        <el-form-item :label="$t('table.description')" prop="description" >
+          <el-input
+            :autosize="{ minRows: 2, maxRows: 5}"
+            v-model="temp.description"
+            :disabled="this.$store.state.user.currentRoles != 'webAdmin'"
+            type="textarea"
+            clearable
+            resize="none" />
+        </el-form-item>
+        <el-form-item v-if="dialogStatus !='create'" :label="$t('table.status')" prop="status">
+          <el-radio-group v-model="temp.status" :disabled="this.$store.state.user.currentRoles != 'webAdmin'" size="small">
+            <el-radio-button label="1">运营中</el-radio-button>
+            <el-radio-button label="3">已停止</el-radio-button>
+            <el-radio-button label="2">已删除</el-radio-button>
+          </el-radio-group>
         </el-form-item>
 
         <!-- 物模型部分开始 -->
-        <el-form-item :label="$t('table.specification')">
-          <el-button @click="handleSpecification()">{{ $t('table.editSpecification') }}</el-button>
+        <el-form-item v-if="dialogStatus !='create'" :label="$t('table.specification')">
+          <el-button
+            v-for="(sp,index) in temp.specification"
+            :key="index"
+            :disable-transitions="false"
+            type="mini"
+            class="spButtonStyle"
+            @click="handleUpdateSpecification(index)"
+          >{{ index+1+'.'+sp.name }}</el-button>
+          <el-button
+            v-if="this.$store.state.user.currentRoles == 'webAdmin'"
+            size="mini"
+            @click="handleSpecification()"
+          >{{ $t('table.createSpecification') }}</el-button>
         </el-form-item>
         <!-- 物模型部分结束 -->
-
         <!--标签部分开始-->
-        <el-form-item :label="$t('table.tags')">
-          <el-tag
-            v-for="tag in temp.tags"
-            :key="tag"
-            :type="tag.type"
-            :disable-transitions="false"
-            closable
-            @close="handleClose(tag)">
-            {{ tag }}
-          </el-tag>
+        <el-form-item v-if="dialogStatus !='create'" :label="$t('table.tags')">
+          <div v-show="this.$store.state.user.currentRoles != 'webAdmin'">
+            <el-tag
+              v-for="tag in temp.tags"
+              :key="tag"
+              :type="tag.type"
+              :disable-transitions="false"
+            >{{ tag }}</el-tag>
+          </div>
+          <div v-show="this.$store.state.user.currentRoles == 'webAdmin'">
+            <el-tag
+              v-for="tag in temp.tags"
+              :key="tag"
+              :type="tag.type"
+              :disable-transitions="false"
+              closable
+              @close="handleClose(tag)"
+            >{{ tag }}</el-tag>
+          </div>
           <el-input
-            v-show="this.$store.state.user.role == 0"
+            v-show="this.$store.state.user.currentRoles == 'webAdmin'"
             v-if="inputVisible"
             ref="saveTagInput"
             v-model="inputValue"
             class="input-new-tag"
             size="small"
             @keyup.enter.native="handleInputConfirm"
-            @blur="handleInputConfirm"/>
-          <el-button v-show="this.$store.state.user.role == 0" v-else class="button-new-tag" size="mini" @click="showInput">+ 新建标签</el-button>
+            @blur="handleInputConfirm"
+          />
+          <el-button
+            v-show="this.$store.state.user.currentRoles == 'webAdmin'"
+            v-else
+            class="button-new-tag"
+            size="mini"
+            @click="showInput"
+          >+ 新建标签</el-button>
         </el-form-item>
         <!--标签部分结束-->
       </el-form>
       <div class="dialogButton">
-        <el-button v-if="dialogStatus !='create' && showProDetailFlag == false" @click="showProDetailFlag = true">{{ $t('table.showDetail') }}</el-button>
-        <el-button v-if="dialogStatus !='create' && showProDetailFlag == true" @click="showProDetailFlag = false">{{ $t('table.closeDetail') }}</el-button>
+        <el-button
+          v-if="dialogStatus !='create' && showProDetailFlag == false"
+          @click="showProDetailFlag = true"
+        >{{ $t('table.showDetail') }}</el-button>
+        <el-button
+          v-if="dialogStatus !='create' && showProDetailFlag == true"
+          @click="showProDetailFlag = false"
+        >{{ $t('table.closeDetail') }}</el-button>
         <el-button @click="dialogFormVisible = false">{{ $t('table.cancel') }}</el-button>
-        <el-button v-if="this.$store.state.user.role == 0" type="primary" @click="dialogStatus==='create'?CreateProduct():UpdateProduct()">{{ $t('table.confirm') }}</el-button>
+        <el-button
+          v-if="this.$store.state.user.currentRoles == 'webAdmin'"
+          type="primary"
+          @click="dialogStatus==='create'?CreateProduct(selectOrgId):UpdateProduct()"
+        >{{ $t('table.confirm') }}</el-button>
       </div>
       <el-collapse-transition>
         <div v-show="showProDetailFlag">
           <el-form label-position="left" label-width="90px" style="width: 400px; margin-left:50px;">
-            <el-form-item :label="$t('table.id')" prop="_id" >
-              <!-- <el-input v-model="temp._id" :disabled="true"/> -->
-              <span>{{ temp._id }}</span>
+            <el-form-item :label="$t('table.id')" prop="id">
+              <span>{{ temp.id }}</span>
             </el-form-item>
-            <el-form-item :label="$t('table.creater')" prop="createdBy" >
-              <!-- <el-input v-model="temp.createdBy" :disabled="true"/> -->
-              <span>{{ temp.createdBy }}</span>
+            <el-form-item :label="$t('table.organization')" prop="organization">
+              <span>{{ temp.organization }}</span>
             </el-form-item>
-            <el-form-item :label="$t('table.createdName')" prop="createdName" >
-              <!-- <el-input v-model="temp.createdName" :disabled="true"/> -->
-              <span>{{ temp.createdName }}</span>
+            <el-form-item :label="$t('table.productKey')" prop="organizationName">
+              <span>{{ temp.productKey }}</span>
             </el-form-item>
-            <el-form-item :label="$t('table.organization')" prop="organization" >
-              <!-- <el-input v-model="temp.organizationId" :disabled="true"/> -->
-              <span>{{ temp.organizationId }}</span>
+            <el-form-item :label="$t('table.productSecret')" prop="organizationName">
+              <span>{{ temp.productSecret }}</span>
             </el-form-item>
-            <el-form-item :label="$t('table.organizationName')" prop="organizationName" >
-              <!-- <el-input v-model="temp.organizationName" :disabled="true"/> -->
-              <span>{{ temp.organizationName }}</span>
-            </el-form-item>
-            <el-form-item :label="$t('table.customer')" prop="customer" >
-              <span
-                v-for="customerIds in temp.customerId"
-                :key="customerIds">
-                {{ customerIds }}
-              </span>
-            </el-form-item>
-            <el-form-item :label="$t('table.customerName')" prop="customerName" >
-              <span>{{ temp.customerName }}</span>
-            </el-form-item>
-            <el-form-item v-if="temp.memberCount" :label="$t('table.memberCount')" prop="memberCount" >
-              <!-- <el-input v-model="temp.memberCount" :disabled="true"/> -->
-              <span>{{ temp.memberCount }}</span>
-            </el-form-item>
-            <el-form-item :label="$t('table.createdAt')" prop="createdAt" >
-              <!-- <el-input v-model="temp.createdAt" :disabled="true"/> -->
+            <el-form-item :label="$t('table.createdAt')" prop="createdAt">
               <span>{{ temp.createdAt }}</span>
+            </el-form-item>
+            <el-form-item :label="$t('table.updatedAt')" prop="customerName">
+              <span>{{ temp.updatedAt }}</span>
+            </el-form-item>
+            <el-form-item :label="$t('table.endDate')" prop="customerName">
+              <span>{{ temp.endDate }}</span>
             </el-form-item>
           </el-form>
         </div>
@@ -147,58 +280,99 @@
     </el-dialog>
 
     <!-- 物模型编辑框开始 -->
-    <el-dialog :title="specificationDialogTitle" :visible.sync="specificationDialogVisible">
-      <el-table
-        :data="temp.specification"
-        stripe
-        style="width: 100%">
-        <el-table-column type="expand">
-          <template slot-scope="props">
-            <el-form label-position="left" inline class="demo-table-expand">
-              <el-form-item :label="$t('table.specificationIdentifier')" prop="specificationIdentifier">
-                <el-input v-model="props.row.identifier" clearable autofocus/>
-              </el-form-item>
-              <el-form-item :label="$t('table.specificationName')">
-                <el-input v-model="props.row.name" clearable/>
-              </el-form-item>
-              <el-form-item :label="$t('table.specificationType')">
-                <el-input v-model="props.row.dataType.type" clearable/>
-              </el-form-item>
-              <el-form-item :label="$t('table.specificationMin')">
-                <el-input v-model="props.row.dataType.specs.min" clearable/>
-              </el-form-item>
-              <el-form-item :label="$t('table.specificationMax')">
-                <el-input v-model="props.row.dataType.specs.max" clearable/>
-              </el-form-item>
-              <el-form-item :label="$t('table.specificationUnit')">
-                <el-input v-model="props.row.dataType.specs.unit" clearable/>
-              </el-form-item>
-              <el-form-item :label="$t('table.specificationUnitName')">
-                <el-input v-model="props.row.dataType.specs.unitName" clearable/>
-              </el-form-item>
-              <el-form-item :label="$t('table.specificationDescription')" style="width:100%">
-                <el-input :autosize="{ minRows: 2, maxRows: 4}" v-model="props.row.description" style="width:100%" type="textarea" />
-              </el-form-item>
-            </el-form>
-          </template>
-        </el-table-column>
-        <el-table-column
-          :label="$t('table.specificationIdentifier')"
-          prop="identifier"/>
-        <el-table-column
-          :label="$t('table.specificationName')"
-          prop="name"/>
-        <el-table-column
-          :label="$t('table.specificationDescription')"
-          prop="description"/>
-      </el-table>
+    <el-dialog :title="specificationDialogTitle" :visible.sync="specificationDialogVisible" width="700px">
+      <el-form
+        ref="specificationDataForm"
+        :rules="rules"
+        v-model="currentSp"
+        label-position="left"
+        label-width="90px"
+        style="width: 400px; margin-left:50px;"
+      >
+        <el-form-item :label="$t('table.specificationIdentifier')" prop="identifier">
+          <el-input v-model="currentSp.identifier" :disabled="this.$store.state.user.currentRoles != 'webAdmin'" clearable autofocus/>
+        </el-form-item>
+        <el-form-item :label="$t('table.specificationName')" prop="specificationName">
+          <el-input v-model="currentSp.name" :disabled="this.$store.state.user.currentRoles != 'webAdmin'" clearable/>
+        </el-form-item>
+        <el-form-item :label="$t('table.specificationDescription')" prop="specificationDescription">
+          <el-input v-model="currentSp.description" :disabled="this.$store.state.user.currentRoles != 'webAdmin'" clearable/>
+        </el-form-item>
+        <el-form-item :label="$t('table.specificationType')" prop="specificationType">
+          <el-radio-group v-model="currentSp.dataType.type" :disabled="this.$store.state.user.currentRoles != 'webAdmin'" size="small">
+            <el-radio-button label="int">int</el-radio-button>
+            <el-radio-button label="float">float</el-radio-button>
+          </el-radio-group>
+        </el-form-item>
+        <el-card>
+          <el-form-item :label="$t('table.specificationMin')" prop="specificationMin">
+            <el-input-number v-model="currentSp.dataType.specs.min" :disabled="this.$store.state.user.currentRoles != 'webAdmin'" size="small"/>
+          </el-form-item>
+          <el-form-item :label="$t('table.specificationMax')" prop="specificationMax">
+            <el-input-number
+              :disabled="this.$store.state.user.currentRoles != 'webAdmin'"
+              v-model="currentSp.dataType.specs.max"
+              :min="this.currentSp.dataType.specs.min"
+              size="small"
+            />
+          </el-form-item>
+          <el-form-item :label="$t('table.specificationUnit')" prop="specificationUnit">
+            <el-radio-group v-model="currentSp.dataType.specs.unit" :disabled="this.$store.state.user.currentRoles != 'webAdmin'" size="small">
+              <el-radio-button label="g">g</el-radio-button>
+              <el-radio-button label="ml">ml</el-radio-button>
+              <el-radio-button>其他</el-radio-button>
+            </el-radio-group>
+            <el-input
+              v-show="currentSp.dataType.specs.unit != 'g' && currentSp.dataType.specs.unit != 'ml'"
+              :disabled="this.$store.state.user.currentRoles != 'webAdmin'"
+              v-model="currentSp.dataType.specs.unit"
+              clearable
+            />
+          </el-form-item>
+          <el-form-item :label="$t('table.specificationUnitName')" prop="specificationUnitName">
+            <el-radio-group v-model="currentSp.dataType.specs.unitName" :disabled="this.$store.state.user.currentRoles != 'webAdmin'" size="small">
+              <el-radio-button label="克" aria-checked="1">克</el-radio-button>
+              <el-radio-button label="毫升">毫升</el-radio-button>
+              <el-radio-button>其他</el-radio-button>
+            </el-radio-group>
+            <el-input
+              v-show="currentSp.dataType.specs.unitName != '克' && currentSp.dataType.specs.unitName != '毫升'"
+              :disabled="this.$store.state.user.currentRoles != 'webAdmin'"
+              v-model="currentSp.dataType.specs.unitName"
+              clearable
+            />
+          </el-form-item>
+        </el-card>
+      </el-form>
+      <div class="dialogButton">
+        <el-button
+          v-if="spDialogStatus == 'update' && this.$store.state.user.currentRoles == 'webAdmin'"
+          type="danger"
+          @click="DeleteSp()"
+        >{{ $t('table.delete') }}</el-button>
+        <el-button @click="specificationDialogVisible = false">{{ $t('table.cancel') }}</el-button>
+        <el-button
+          v-if="this.$store.state.user.currentRoles == 'webAdmin'"
+          type="primary"
+          @click="spDialogStatus==='create'?CreateSp():UpdateSp()"
+        >{{ $t('table.submit') }}</el-button>
+      </div>
     </el-dialog>
     <!-- 物模型编辑框结束 -->
   </div>
 </template>
 
 <script>
-import { getProductListByOrg, getProductListByCus, getAllProductList, deleteProduct, updateProduct, createProduct } from '@/api/product'
+import {
+  getProductListByOrg,
+  getProductListByCus,
+  getAllProductList,
+  deleteProduct,
+  updateProduct,
+  createProduct,
+  getProductDetail
+} from '@/api/product'
+import { getOrganizationList } from '@/api/organizations'
 import waves from '@/directive/waves' // 水波纹指令
 import { parseTime } from '@/utils'
 export default {
@@ -208,9 +382,20 @@ export default {
   },
   data() {
     return {
-      tableKey: 0,
+      // 整体
       listLoading: true,
-      showProDetailFlag: false,
+      tableKey: 0,
+      searchOrgName: '', // 搜索框的内容
+      searchStatus: '',
+      nullList: [], // 表格数据为null时，防止.length失效
+      rules: {
+        // 表单验证，对应prop值  TODO:email更加详细的验证
+        name: [
+          { required: true, message: '请填写产品名称', trigger: 'change' }
+        ]
+      },
+
+      // 弹框、数据相关：
       temp: {
         createdBy: '',
         createdName: '',
@@ -223,42 +408,222 @@ export default {
         tags: [],
         specification: []
       },
-      dialogFormVisible: false,
-      dialogStatus: '',
+      dialogFormVisible: false, // pro编辑框显示
+      dialogStatus: '', // 弹框标题初始化，标题显示为下面的textmap
       textMap: {
         update: '编辑',
-        create: '创建',
-        staff: '成员管理'
+        create: '创建'
       },
+      spDialogStatus: '',
+      organizationListData: [],
       productListData: [],
-      nullList: [], // 表格数据为null时，防止.length失效
-      rules: {// 表单验证，对应prop值
-        name: [{ required: true, message: '请填写客户名称', trigger: 'change' }],
-        email: [{ required: true, message: '请填写邮箱', trigger: 'change' }],
-        password: [{ required: true, message: '请输入密码', trigger: 'change' }],
-        fullname: [{ required: true, message: '请填写全名', trigger: 'change' }]
-      },
       tags: [],
       inputVisible: false,
       inputValue: '',
       specification: [],
       specificationDialogVisible: false,
-      specificationDialogTitle: ''
+      specificationDialogTitle: '',
+      selectOrgId: '',
+      currentSp: {
+        identifier: '',
+        name: '',
+        description: '',
+        dataType: {
+          type: '',
+          specs: {
+            min: '',
+            max: '',
+            unit: '',
+            unitName: ''
+          }
+        }
+      },
+      currentSpIndex: '',
+
+      // 按钮相关：
+      showProDetailFlag: false,
+      showMoreOrgButtonFlag: true,
+      showMoreProButtonFlag: true,
+      showSideSelect:
+        this.$store.state.user.currentRoles == 'webAdmin' &&
+        !this.$route.query.organizationID, // 是webadmin且是点击左侧sidebar入口进入的
+
+      // 分页相关：
+      currentProPage: 1,
+      currentOrgPage: 1,
+      pageSize: 10, // 单页条数，要和api中的保持一致，否则数据会有重复
+      needRefreshProListFlag: 0,
+      needRefreshOrgListFlag: 0
     }
   },
   created() {
-    this.GetProductList(this.$route.query.customerID)
+    this.GetProductList()
   },
   methods: {
-    GetProductList(cusId) {
-      if (cusId) {
+    resetTemp() { // 重置、初始化数组
+      this.temp = {
+        organizationId: '',
+        customerId: [],
+        status: '',
+
+        description: '',
+        tags: [],
+        specification: []
+      }
+      this.showProDetailFlag = false
+    },
+    resetSp() { // 重置sp对象，默认几个数据选择
+      this.currentSp = {
+        identifier: '',
+        name: '',
+        description: '',
+        dataType: {
+          type: 'int',
+          specs: {
+            min: '',
+            max: '',
+            unit: 'g',
+            unitName: '克'
+          }
+        }
+      }
+    },
+    selectOrg(orgId) { // 选择左侧org列表，暂存选择项，拉取列表
+      this.needRefreshProListFlag = 1
+      this.selectOrgId = orgId
+      this.GetProductList()
+      this.needRefreshProListFlag = 0
+    },
+    GetProductList(page, size, status) {
+      if (this.$route.query.organizationID) { // 如果url中有orgid，则先保存到selectOrgId中，之后查这个就行
+        // 给新建产品做准备
+        this.selectOrgId = this.$route.query.organizationID
+      }
+      if (this.needRefreshProListFlag) {
+        this.productListData = []
+      }
+      if (status) {
         this.listLoading = true
-        getProductListByCus(this.$store.state.user.token, cusId).then(response => { // 如果url中有cusID，则优先根据查询id
-          if (response.data.status == '200') {
-            if (response.data.data == null) {
+        getProductListByOrg(this.selectOrgId, page, size, status).then(response => {
+          if (response.status == 200) {
+            if (response.data.length < this.pageSize) {
+              // 不够一页了，隐藏更多按钮，让当前页再减回来，因为点更多的时候加了一个
+              this.showMoreProButtonFlag = false
+              this.productListData.push(...response.data)
+              this.currentProPage--
+            } else {
+              this.productListData.push(...response.data)
+            }
+            this.listLoading = false
+          } else {
+            this.$message.error({
+              message: response
+            })
+            this.listLoading = false
+          }
+        })
+      } else if (page && size) {
+        this.listLoading = true
+        getProductListByOrg(this.selectOrgId, page, size).then(response => {
+          if (response.status == 200) {
+            if (response.data.length < this.pageSize) {
+              // 不够一页了，隐藏更多按钮，让当前页再减回来，因为点更多的时候加了一个
+              this.showMoreProButtonFlag = false
+              this.productListData.push(...response.data)
+              this.currentProPage--
+            } else {
+              this.productListData.push(...response.data)
+            }
+            this.listLoading = false
+          } else {
+            this.$message.error({
+              message: response
+            })
+            this.listLoading = false
+          }
+        })
+      } else if (this.selectOrgId) {
+        this.listLoading = true
+        getProductListByOrg(this.selectOrgId).then(response => {
+          if (response.status == 200) {
+            if (response.data == null) {
               this.productListData = this.nullList
             } else {
-              this.productListData = response.data.data
+              this.productListData.push(...response.data)
+            }
+            this.listLoading = false
+          } else {
+            this.$message.error({
+              message: response
+            })
+            this.listLoading = false
+          }
+        })
+      } else {
+        // url中没有id，则没有东西在加载的时候保存到selectOrgId
+        if (this.$store.state.user.currentRoles == 'webAdmin') {
+          // 是webAdmin
+          this.listLoading = true
+          this.GetOrganizationList()
+        } else {
+          // url没有id并且不是webadmin
+          this.selectOrgId = this.$store.state.user.currentRelatedId
+          this.GetProductList() // 查自己所属的列表
+        }
+      }
+    },
+    GetOrganizationList(page, size, name) {
+      // 启动获得orglist，如果非webadmin则不用这个
+      this.listLoading = true
+      if (this.needRefreshOrgListFlag) {
+        this.organizationListData = []
+      }
+      if (name) {
+        getOrganizationList(page, size, name).then(response => {
+          if (response.status == 200) {
+            if (response.data.length < this.pageSize) {
+              // 不够一页了，隐藏更多按钮，让当前页再减回来，因为点更多的时候加了一个
+              this.showMoreOrgButtonFlag = false
+              this.organizationListData.push(...response.data)
+              this.currentOrgPage--
+            } else {
+              this.organizationListData.push(...response.data)
+            }
+            this.listLoading = false
+          } else {
+            this.$message.error({
+              message: response
+            })
+            this.listLoading = false
+          }
+        })
+      } else if (page && size) {
+        getOrganizationList(page, size).then(response => {
+          if (response.status == 200) {
+            if (response.data.length < this.pageSize) {
+              // 不够一页了，隐藏更多按钮，让当前页再减回来，因为点更多的时候加了一个
+              this.showMoreOrgButtonFlag = false
+              this.organizationListData.push(...response.data)
+              this.currentOrgPage--
+            } else {
+              this.organizationListData.push(...response.data)
+            }
+            this.listLoading = false
+          } else {
+            this.$message.error({
+              message: response
+            })
+            this.listLoading = false
+          }
+        })
+      } else {
+        getOrganizationList().then(response => {
+          // 首次加载，按api中的page和size
+          if (response.status == '200') {
+            if (response.data == null) {
+              this.organizationListData = this.nullList
+            } else {
+              this.organizationListData.push(...response.data)
             }
             this.listLoading = false
           } else {
@@ -268,176 +633,123 @@ export default {
             this.listLoading = false
           }
         })
-      } else {
-        if (this.$store.state.user.roles == 'webAdmin') { // url没有id但是是webadmin
-          if (this.$route.query.organizationID) { // 有orgId 优先根据orgId查
-            this.listLoading = true
-            getProductListByOrg(this.$store.state.user.token, this.$route.query.organizationID).then(response => {
-              if (response.data.status == '200') {
-                if (response.data.data == null) {
-                  this.productListData = this.nullList
-                } else {
-                  this.productListData = response.data.data
-                }
-                this.listLoading = false
-              } else {
-                this.$message.error({
-                  message: response.data.msg
-                })
-                this.listLoading = false
-              }
-            })
-          } else {
-            this.listLoading = true
-            getAllProductList(this.$store.state.user.token).then(response => {
-              if (response.data.status == '200') {
-                if (response.data.data == null) {
-                  this.productListData = this.nullList
-                } else {
-                  this.productListData = response.data.data
-                }
-                this.listLoading = false
-              } else {
-                this.$message.error({
-                  message: response.data.msg
-                })
-                this.listLoading = false
-              }
-            })
-          }
-        } else if (this.$store.state.user.type == 1) { // 没有id 不是webadmin，是组织管理员或成员，根据组织id查其下的所有产品
-          this.listLoading = true
-          getProductListByOrg(this.$store.state.user.token, this.$store.state.user.organizationId).then(response => {
-            if (response.data.status == '200') {
-              if (response.data.data == null) {
-                this.productListData = this.nullList
-              } else {
-                this.productListData = response.data.data
-              }
-              this.listLoading = false
-            } else {
-              this.$message.error({
-                message: response.data.msg
-              })
-              this.listLoading = false
-            }
-          })
-        } else { // 自己是客户管理员或者客户成员，查自己的产品
-          this.listLoading = true
-          getProductListByCus(this.$store.state.user.token, this.$store.state.user.customerId).then(response => {
-            if (response.data.status == '200') {
-              if (response.data.data == null) {
-                this.productListData = this.nullList
-              } else {
-                this.productListData = response.data.data
-              }
-              this.listLoading = false
-            } else {
-              this.$message.error({
-                message: response.data.msg
-              })
-              this.listLoading = false
-            }
-          })
-        }
       }
     },
-    DeleteProduct(row) {
-      if (row.deviceCount > 0) {
-        this.$alert('请删除所有设备后再删除产品?', '拒绝删除', {
-          cancelButtonText: '关闭',
-          type: 'info'
-        })
-      } else {
-        this.$confirm('将删除该产品, 是否继续?', '删除', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          deleteProduct(this.$store.state.user.token, row._id).then(response => {
-            this.listLoading = true
-            this.$message({
-              message: response.data.msg,
-              type: 'success'
-            })
-            this.listLoading = false
-            this.GetProductList(this.$route.query.customerID)
-          })
-        }).catch(() => {
-          this.$message({
-            type: 'info',
-            message: '未删除'
-          })
-        })
-      }
-    },
-    resetTemp() {
-      this.temp = {
-        createdBy: '',
-        organizationId: '',
-        customerId: [],
-
-        description: '',
-        tags: []
-      }
-      this.showProDetailFlag = false
-    },
-    handleCreate() {
-      if (this.$store.state.user.roles != 'customerAdmin') {
-        this.$alert('请使用客户管理员帐号新建产品', '拒绝新建', {
-          cancelButtonText: '关闭',
-          type: 'info'
-        })
-      } else {
-        this.resetTemp()
-        this.dialogStatus = 'create'
-        this.dialogFormVisible = true
-        this.$nextTick(() => {
-          this.$refs['dataForm'].clearValidate()
-        })
-      }
-    },
-    CreateProduct() {
-      this.$confirm('将创建该产品, 是否继续?', '创建', {
+    DeleteProduct(row) { // 删除产品，修改状态为2
+      this.$confirm('将删除该产品, 是否继续?', '修改', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
-      }).then(() => {
-        this.$refs['dataForm'].validate((valid) => {
-          if (valid) {
-            this.temp.createdBy = this.$store.state.user._id// 创建人
-            this.temp.createdName = this.$store.state.user.fullname// 创建人
-            this.temp.customerId[0] = this.$store.state.user.customerId// 所属客户
-            this.temp.customerName = this.$store.state.user.customerName// 所属客户
-            this.temp.organizationId = this.$store.state.user.organizationId// 所属组织
-            this.temp.organizationName = this.$store.state.user.organizationName// 所属组织
-            createProduct(this.$store.state.user.token, this.temp).then((response) => {
-              if (response.data.status == '200') {
+      })
+        .then(() => {
+          const tempData = { // 只传这一条数据
+            status: 2
+          }
+          updateProduct(row.id, tempData)
+            .then(response => {
+              if (response.status == 200) {
                 this.dialogFormVisible = false
-                this.GetProductList(this.$route.query.customerID)
+                for (var i = 0; i < this.productListData.length; i++) {
+                  // 从表格中删除这行
+                  if (this.productListData[i].id == row.id) {
+                    this.productListData[i].status = 2
+                  }
+                }
                 this.$notify({
-                  title: response.data.msg,
+                  title: '删除成功',
                   type: 'success',
                   duration: 2000
                 })
               } else {
                 this.$notify.error({
-                  title: response.data.msg,
+                  title: response,
                   duration: 2000
                 })
               }
             })
+            .catch(() => {
+              this.$message.error({
+                message: '删除错误'
+              })
+            })
+        })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '未删除'
+          })
+        })
+    },
+    GetProductDetail(proId) { // 获得org内容，在webadmin点击修改时，和非webadmin获取自己详情时调用
+      getProductDetail(proId).then(response => {
+        if (response.status == 200) {
+          this.temp = response.data
+          if (response.data.tags == null) {
+            this.temp.tags = []
           }
-        })
-      }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: '未创建'
-        })
+          if (response.data.specification == null) {
+            this.temp.specification = []
+            this.resetSp()
+          }
+        } else {
+          this.$notify.error({
+            title: response,
+            duration: 2000
+          })
+        }
       })
     },
-    handleUpdate(row) {
-      this.temp = Object.assign({}, row) // copy obj
+    handleCreate() { // 打开创建产品弹框
+      this.resetTemp()
+      this.dialogStatus = 'create'
+      this.dialogFormVisible = true
+      this.$nextTick(() => {
+        this.$refs['dataForm'].clearValidate()
+      })
+    },
+    CreateProduct(orgId) {
+      this.$refs['dataForm'].validate(valid => {
+        if (valid) {
+          this.$confirm('将创建该产品, 是否继续?', '创建', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          })
+            .then(() => {
+              this.temp.organizationId = orgId // 所属组织
+              this.temp.status = '1' // 初始状态为运营中
+              createProduct(this.temp).then(response => {
+                if (response.status == 201) {
+                  this.dialogFormVisible = false
+                  this.productListData.push(response.data)
+                  this.$notify({
+                    title: '新建成功',
+                    type: 'success',
+                    duration: 2000
+                  })
+                } else {
+                  this.$notify.error({
+                    title: response,
+                    duration: 2000
+                  })
+                }
+              }).catch(() => {
+                this.$message.error({
+                  message: '创建错误'
+                })
+              })
+            })
+        }
+      })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '未创建'
+          })
+        })
+    },
+    handleUpdate(row) { // 弹出修改产品框，弹出时拉取详情
+      this.GetProductDetail(row.id)
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
       this.$nextTick(() => {
@@ -449,36 +761,50 @@ export default {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
-      }).then(() => {
-        this.$refs['dataForm'].validate((valid) => {
-          if (valid) {
-            const tempData = Object.assign({}, this.temp)
-            updateProduct(this.$store.state.user.token, this.temp._id, tempData).then((response) => {
-              if (response.data.status == '200') { // 返回type是success时，关弹窗，改列表
-                this.dialogFormVisible = false
-                this.GetProductList(this.$route.query.customerID)
-                this.$notify({
-                  title: response.data.msg,
-                  type: 'success',
-                  duration: 2000
-                })
-              } else {
-                this.$notify.error({
-                  title: response.data.msg,
-                  duration: 2000
-                })
-              }
-            })
-          }
-        })
-      }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: '未修改'
-        })
       })
+        .then(() => {
+          this.$refs['dataForm'].validate(valid => {
+            if (valid) {
+              const tempData = Object.assign({}, this.temp)
+              updateProduct(this.temp.id, tempData)
+                .then(response => {
+                  if (response.status == 200) {
+                    // 返回type是success时，关弹窗，改列表
+                    this.dialogFormVisible = false
+                    for (var i = 0; i < this.productListData.length; i++) {
+                      // 修改后遍历表格，替换为新的数据
+                      if (this.productListData[i].id == this.temp.id) {
+                        this.productListData.splice(i, 1, tempData) // put时，如果服务器返回新的数据，就改成response.data，如果不返回，就把提交的数据替换到里面，反正点击的时候会拉取一遍
+                      }
+                    }
+                    this.$notify({
+                      title: '修改成功',
+                      type: 'success',
+                      duration: 2000
+                    })
+                  } else {
+                    this.$notify.error({
+                      title: response,
+                      duration: 2000
+                    })
+                  }
+                })
+                .catch(() => {
+                  this.$message.error({
+                    message: '修改错误'
+                  })
+                })
+            }
+          })
+        })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '未修改'
+          })
+        })
     },
-    handleExport() {
+    handleExport() { // TODO 导出
       import('@/vendor/Export2Excel').then(excel => {
         const tHeader = ['name', 'createdBy']
         const filterVal = ['name', 'createdBy']
@@ -494,29 +820,31 @@ export default {
       })
     },
     formatJson(filterVal, jsonData) {
-      return jsonData.map(v => filterVal.map(j => {
-        if (j === 'timestamp') {
-          return parseTime(v[j])
-        } else {
-          return v[j]
-        }
-      }))
+      return jsonData.map(v =>
+        filterVal.map(j => {
+          if (j === 'timestamp') {
+            return parseTime(v[j])
+          } else {
+            return v[j]
+          }
+        })
+      )
     },
+
     jumpRouter(url, param) {
       this.$router.push({ path: '/' + url + '/index' + param })
     },
+
     //  标签部分JS
     handleClose(tag) {
       this.temp.tags.splice(this.temp.tags.indexOf(tag), 1)
     },
-
     showInput() {
       this.inputVisible = true
       this.$nextTick(_ => {
         this.$refs.saveTagInput.$refs.input.focus()
       })
     },
-
     handleInputConfirm() {
       let inputValue = this.inputValue
       if (inputValue) {
@@ -526,56 +854,107 @@ export default {
       this.inputValue = ''
     },
     // 标签部分JS结束
-
     // 物模型部分
-    handleSpecification() {
+    handleUpdateSpecification(spIndex) { // 弹出物模型编辑框，以返回数组的index为准，复制数据
+      this.currentSpIndex = spIndex
+      this.currentSp = this.temp.specification[spIndex]
+      this.spDialogStatus = 'update'
       this.specificationDialogTitle = '编辑物模型'
       this.specificationDialogVisible = true
       this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
+        this.$refs['specificationDataForm'].clearValidate()
       })
+    },
+    handleSpecification() { // 弹出创建物模型框，先初始化sp
+      this.resetSp()
+      this.spDialogStatus = 'create'
+      this.specificationDialogTitle = '新建物模型'
+      this.specificationDialogVisible = true
+      this.$nextTick(() => {
+        this.$refs['specificationDataForm'].clearValidate()
+      })
+    },
+    CreateSp() { // 新建一个物模型
+      this.temp.specification.push(this.currentSp)
+      this.specificationDialogVisible = false
+    },
+    UpdateSp() { // 修改物模型，替换数组，以index为准
+      this.temp.specification[this.currentSpIndex] = this.currentSp
+      this.specificationDialogVisible = false
+    },
+    DeleteSp() { // 删除物模型
+      this.temp.specification.splice(this.currentSpIndex, 1)
+      this.specificationDialogVisible = false
+    },
+    handleSearchOrg() {
+      // 点击搜索按钮调用
+      if (this.searchOrgName) {
+        this.needRefreshOrgListFlag = 1
+        this.GetOrganizationList(
+          this.currentOrgPage,
+          this.pageSize,
+          this.searchOrgName
+        )
+        this.showMoreOrgButtonFlag = false
+        this.needRefreshOrgListFlag = 0
+      }
+    },
+    showMoreOrg() {
+      // 无限滚动分页
+      this.currentOrgPage++
+      this.GetOrganizationList(this.currentOrgPage, this.pageSize, this.searchOrgName)
+      // TODO： 页面保持滚动在最下面
+    },
+    showLessOrg() {
+      // 收起，当滚动到底时，显示收起，这时候收起到只显示第一页，页面面大小由pagesize决定
+      this.currentOrgPage = 1
+      this.showMoreOrgButtonFlag = !this.showMoreOrgButtonFlag
+      this.organizationListData.splice(
+        this.pageSize,
+        this.organizationListData.length - this.pageSize
+      )
+    },
+    showMorePro() {
+      // 无限滚动分页
+      this.currentProPage++
+      this.GetProductList(this.currentProPage, this.pageSize, this.searchStatus)
+      // TODO： 页面保持滚动在最下面
+    },
+    showLessPro() {
+      // 收起，当滚动到底时，显示收起，这时候收起到只显示第一页，页面大小由pagesize决定
+      this.currentProPage = 1
+      this.showMoreProButtonFlag = !this.showMoreproButtonFlag
+      this.productListData.splice(
+        this.pageSize,
+        this.productListData.length - this.pageSize
+      )
+    },
+    handleFilterPro() {
+      this.needRefreshProListFlag = 1
+      this.currentProPage = 1
+      this.showMoreProButtonFlag = 1
+      this.GetProductList(this.currentProPage, this.pageSize, this.searchStatus)
+      this.needRefreshProListFlag = 0
     }
   }
 }
 </script>
 <style>
-  .dialogButton{
-    text-align: right;
-    padding-bottom: 20px;
-  }
-</style>
-<!--标签部分样式-->
-<style>
-  .el-tag {
-    margin-right: 10px;
-  }
-
-  .input-new-tag {
-    width: 90px;
-    margin-left: 10px;
-    vertical-align: bottom;
-  }
-</style>
-
-<!--物模型样式-->
-<style>
-  .demo-table-expand {
-    font-size: 0;
-  }
-  .demo-table-expand label {
-    width: 90px;
-    color: #99a9bf;
-  }
-  .demo-table-expand .el-form-item {
-    margin-right: 0;
-    margin-bottom: 0;
-    width: 50%;
-    margin-top:10px;
-  }
-  .demo-table-expand textarea {
-
-    width: 100%;
-  }
-
+.dialogButton {
+  text-align: right;
+  padding-bottom: 20px;
+  margin-top: 15px;
+}
+.el-tag {
+  margin-right: 10px;
+}
+.input-new-tag {
+  width: 90px;
+  margin-left: 10px;
+  vertical-align: bottom;
+}
+.pagination-container{
+  margin: 0 20px;
+}
 </style>
 
