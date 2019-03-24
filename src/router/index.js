@@ -175,20 +175,6 @@ export const asyncRouterMap = [
   },
 
   {
-    path: '/allUsers',
-    component: Layout,
-    redirect: 'noredirect',
-    meta: { roles: ['webAdmin', 'temp'] },
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/allUsers/index'),
-        name: 'allUsers',
-        meta: { title: 'allUsers', icon: 'people' }
-      }
-    ]
-  },
-  {
     path: '/organizations',
     component: Layout,
     redirect: 'noredirect',
@@ -236,6 +222,7 @@ export const asyncRouterMap = [
     component: Layout,
     redirect: 'noredirect',
     meta: { roles: ['webAdmin', 'organizationAdmin', 'customerAdmin', 'organizationStaff', 'customerStaff'] },
+    hidden: true,
     children: [
       {
         path: 'index',

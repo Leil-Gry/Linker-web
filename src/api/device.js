@@ -1,25 +1,30 @@
 import request from '@/utils/request'
 
-export function getDeviceList(data){
+export function getDeviceList(proId){
   return request({
-    url:'/devices/list',
-    method:'get',
-    params:{data}
+    url:'/product/' + proId + '/device',
+    method:'get'
   })
 }
 
-export function createDevice(data) {
+export function createDevice(proId, data) {
   return request({
-    url: '/devices/create',
+    url: '/product/' + proId + '/device',
     method: 'post',
     data
   })
 }
 
-export function updateDevice(data) {
+export function updateDevice(proId, devId ,data) {
   return request({
-    url: '/devices/update',
-    method: 'post',
+    url: '/product/' + proId + '/device/' + devId,
+    method: 'put',
     data
+  })
+}
+export function getDeviceDetail(proId, devId){
+  return request({
+    url:'/product/' + proId + '/device/' + devId,
+    method:'get'
   })
 }

@@ -38,18 +38,41 @@ export function getProductListByOrg(orgId, page, size, status) { // 得到org下
     })
   }
 }
-
-// export function getProductListByCus(authorization, cusId) { // 得到cus下面的product
-//   return request({
-//     url: '/customer/' + cusId + '/product',
-//     method: 'get',
-//     headers: { authorization }
-//   })
-// }
-
+export function getProductListByCus(cusId, page, size, status) { // 得到cus下面的product
+  if (status) {
+    return request({
+      url: '/customer/' + cusId + '/product?page=' + page + '&&size=' + size + '&&status=' + status,
+      method: 'get'
+    })
+  } else if (page && size) {
+    return request({
+      url: '/customer/' + cusId + '/product?page=' + page + '&&size=' + size,
+      method: 'get'
+    })
+  } else {
+    return request({
+      url: '/customer/' + cusId + '/product?page=1&&size=10',
+      method: 'get'
+    })
+  }
+}
 export function getProductDetail(id) { // 得到所有product，仅限webadmin
   return request({
     url: '/product/' + id,
     method: 'get'
+  })
+}
+
+export function getMappingList(proId) {
+  return request({
+    url: '/product/' + proId + '/mapping',
+    method: 'get'
+  })
+}
+export function createMapping(proId, data) {
+  return request({
+    url: '/product/' + proId + '/mapping',
+    method: 'post',
+    data
   })
 }

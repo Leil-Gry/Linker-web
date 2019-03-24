@@ -7,22 +7,26 @@ export function createCustomer(proId, data) {
     data
   })
 }
-export function deleteCustomer(authorization, id) {
+export function deleteCustomer(proId, cusId) {
   return request({
-    url: '/customer/' + id,
-    method: 'delete',
-    headers: { authorization }
+    url: '/product/'+ proId + '/customer/' + cusId,
+    method: 'delete'
   })
 }
-export function updateCustomer(authorization, id, data) {
+export function updateCustomer(id, data) {
   return request({
     url: '/customer/' + id,
     method: 'put',
-    headers: { authorization },
     data
   })
 }
-export function getCustomerList(proId, page, size) { // 得到org下面的customer
+export function getCustomerDetail(id) {
+  return request({
+    url: '/customer/' + id,
+    method: 'get'
+  })
+}
+export function getCustomerList(proId, page, size) { // 得到product下面的customer
   if (page && size) {
     return request({
       url: '/customer?productId=' + proId + '&&page=' + page + '&&size=' + size,
@@ -36,42 +40,38 @@ export function getCustomerList(proId, page, size) { // 得到org下面的custom
   }
 }
 
-export function getAllCustomerList(authorization) { // 得到所有customer，仅限webadmin
-  return request({
-    url: '/customer',
-    method: 'get',
-    headers: { authorization }
-  })
-}
+// export function getAllCustomerList(authorization) { // 得到所有customer，仅限webadmin
+//   return request({
+//     url: '/customer',
+//     method: 'get',
+//     headers: { authorization }
+//   })
+// }
 
-export function createCustomerStaff(authorization, data) {
+export function createCustomerStaff(data) {
   return request({
     url: '/user',
     method: 'post',
-    headers: { authorization },
     data
   })
 }
-export function deleteCustomerStaff(authorization, id) {
+export function deleteCustomerStaff(id) {
   return request({
     url: '/user/' + id,
-    method: 'delete',
-    headers: { authorization }
+    method: 'delete'
   })
 }
-export function updateCustomerStaff(authorization, id, data) {
+export function updateCustomerStaff(id, data) {
   return request({
     url: '/user/' + id,
     method: 'put',
-    headers: { authorization },
     data
   })
 }
-export function getCustomerStaffList(authorization, customerId) {
+export function getCustomerStaffList(customerId) {
   return request({
-    url: '/customer/' + customerId + '/user',
-    method: 'get',
-    headers: { authorization }
+    url: '/user?customerId=' + customerId,
+    method: 'get'
   })
 }
 

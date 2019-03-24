@@ -17,8 +17,8 @@
           @click="handleSearchOrg"
         />
         <el-menu class="el-menu-vertical-demo">
-          <el-menu-item v-for="org in organizationListData" index="2" @click="selectOrg(org.id)">
-            <span slot="title">{{ org.name }}</span>
+          <el-menu-item v-for="org in organizationListData" index="2" @click="selectOrg(org.id)" align="center"> 
+            <span slot="title" >{{ org.name }}</span>
           </el-menu-item>
           <!-- Org分页 -->
           <div class="pagination-container">
@@ -28,13 +28,13 @@
               style="width:100%"
               icon="el-icon-arrow-down"
               @click="showMoreOrg"
-            >更多</el-button>
+            >{{$t('table.more')}}</el-button>
             <el-button
               v-if="!showMoreOrgButtonFlag"
               style="width:100%"
               icon="el-icon-arrow-up"
               @click="showLessOrg"
-            >收起</el-button>
+            >{{$t('table.less')}}</el-button>
           </div>
         </el-menu>
       </el-aside>
@@ -58,10 +58,10 @@
               @click="handleExport"
             >{{ $t('excel.export') }} Excel</el-button> -->
             <el-radio-group v-if="this.selectOrgId" v-model="searchStatus" size="primary" class="filter-item" @change="handleFilterPro">
-              <el-radio-button label="1">运营中</el-radio-button>
-              <el-radio-button label="3">已停止</el-radio-button>
-              <el-radio-button label="2">已删除</el-radio-button>
-              <el-radio-button label="">全部</el-radio-button>
+              <el-radio-button label="1">{{$t('table.running')}}</el-radio-button>
+              <el-radio-button label="3">{{$t('table.stoped')}}</el-radio-button>
+              <el-radio-button label="2">{{$t('table.deleted')}}</el-radio-button>
+              <el-radio-button label="">{{$t('table.all')}}</el-radio-button>
             </el-radio-group>
             <el-table
               v-loading="listLoading"
@@ -71,14 +71,14 @@
               fit
               highlight-current-row
               style="width: 100%;"
-              empty-text="暂无数据，或未选择组织"
+              :empty-text="$t('table.emptyForm')"
             >
-              <el-table-column :label="$t('table.productName')" min-width="150px">
+              <el-table-column :label="$t('table.productName')" min-width="150px" align="center">
                 <template slot-scope="scope">
                   <span class="link-type" @click="handleUpdate(scope.row)">{{ scope.row.name }}</span>
                 </template>
               </el-table-column>
-              <el-table-column :label="$t('table.description')" min-width="150px">
+              <el-table-column :label="$t('table.description')" min-width="150px" align="center">
                 <template slot-scope="scope">
                   <span>{{ scope.row.description }}</span>
                 </template>
@@ -86,10 +86,10 @@
               <!-- 状态显示 -->
               <el-table-column :label="$t('table.status')" width="95px" align="center">
                 <template slot-scope="scope">
-                  <el-tag v-if="scope.row.status == '1'">运营中</el-tag>
-                  <el-tag v-else-if="scope.row.status == '2'" type="info">已删除</el-tag>
-                  <el-tag v-else-if="scope.row.status == '3'" type="danger">已停止</el-tag>
-                  <el-tag v-else type="warning">未知状态</el-tag>
+                  <el-tag v-if="scope.row.status == '1'">{{$t('table.running')}}</el-tag>
+                  <el-tag v-else-if="scope.row.status == '2'" type="info">{{$t('table.deleted')}}</el-tag>
+                  <el-tag v-else-if="scope.row.status == '3'" type="danger">{{$t('table.stoped')}}</el-tag>
+                  <el-tag v-else type="warning">{{$t('table.unknow')}}</el-tag>
                 </template>
               </el-table-column>
               <!-- 管理客户按钮 -->
@@ -105,6 +105,21 @@
                     type="primary"
                     @click="jumpRouter('customers','?productID='+scope.row.id)"
                   >{{ $t('table.adminCustomer') }}</el-button>
+                </template>
+              </el-table-column>
+              <!-- 管理设备按钮 -->
+              <el-table-column
+                v-if="this.$store.state.user.currentRoles == 'webAdmin'"
+                :label="$t('table.countDevices')"
+                align="center"
+                width="95"
+              >
+                <template slot-scope="scope">
+                  <el-button
+                    size="mini"
+                    type="primary"
+                    @click="jumpRouter('devices','?productID='+scope.row.id)"
+                  >{{ $t('table.adminDevice') }}</el-button>
                 </template>
               </el-table-column>
               <!--删除按钮-->
@@ -135,13 +150,13 @@
               style="width:100%"
               icon="el-icon-arrow-down"
               @click="showMorePro"
-            >更多</el-button>
+            >{{$t('table.more')}}</el-button>
             <el-button
               v-if="!showMoreProButtonFlag"
               style="width:100%"
               icon="el-icon-arrow-up"
               @click="showLessPro"
-            >收起</el-button>
+            >{{$t('table.less')}}</el-button>
           </div>
         </el-row>
       </el-col>
@@ -171,9 +186,9 @@
         </el-form-item>
         <el-form-item v-if="dialogStatus !='create'" :label="$t('table.status')" prop="status">
           <el-radio-group v-model="temp.status" :disabled="this.$store.state.user.currentRoles != 'webAdmin'" size="small">
-            <el-radio-button label="1">运营中</el-radio-button>
-            <el-radio-button label="3">已停止</el-radio-button>
-            <el-radio-button label="2">已删除</el-radio-button>
+            <el-radio-button label="1">{{$t('table.running')}}</el-radio-button>
+            <el-radio-button label="3">{{$t('table.stoped')}}</el-radio-button>
+            <el-radio-button label="2">{{$t('table.deleted')}}</el-radio-button>
           </el-radio-group>
         </el-form-item>
 
@@ -194,6 +209,15 @@
           >{{ $t('table.createSpecification') }}</el-button>
         </el-form-item>
         <!-- 物模型部分结束 -->
+        <!-- mapping部分 -->
+        <el-form-item v-if="dialogStatus !='create'" :label="$t('table.mapping')">
+          <el-button
+            v-if="this.$store.state.user.currentRoles == 'webAdmin'"
+            size="mini"
+            @click="handleMappingList()"
+          >{{ $t('table.mappingList') }}</el-button>
+        </el-form-item>
+        <!-- mapping部分结束 -->
         <!--标签部分开始-->
         <el-form-item v-if="dialogStatus !='create'" :label="$t('table.tags')">
           <div v-show="this.$store.state.user.currentRoles != 'webAdmin'">
@@ -230,7 +254,7 @@
             class="button-new-tag"
             size="mini"
             @click="showInput"
-          >+ 新建标签</el-button>
+          >+ {{$t('table.newTag')}}</el-button>
         </el-form-item>
         <!--标签部分结束-->
       </el-form>
@@ -259,19 +283,19 @@
             <el-form-item :label="$t('table.organization')" prop="organization">
               <span>{{ temp.organization }}</span>
             </el-form-item>
-            <el-form-item :label="$t('table.productKey')" prop="organizationName">
+            <el-form-item :label="$t('table.productKey')" prop="productKey">
               <span>{{ temp.productKey }}</span>
             </el-form-item>
-            <el-form-item :label="$t('table.productSecret')" prop="organizationName">
+            <el-form-item :label="$t('table.productSecret')" prop="productSecret">
               <span>{{ temp.productSecret }}</span>
             </el-form-item>
             <el-form-item :label="$t('table.createdAt')" prop="createdAt">
               <span>{{ temp.createdAt }}</span>
             </el-form-item>
-            <el-form-item :label="$t('table.updatedAt')" prop="customerName">
+            <el-form-item :label="$t('table.updatedAt')" prop="updatedAt">
               <span>{{ temp.updatedAt }}</span>
             </el-form-item>
-            <el-form-item :label="$t('table.endDate')" prop="customerName">
+            <el-form-item :label="$t('table.endDate')" prop="endDate">
               <span>{{ temp.endDate }}</span>
             </el-form-item>
           </el-form>
@@ -318,9 +342,9 @@
           </el-form-item>
           <el-form-item :label="$t('table.specificationUnit')" prop="specificationUnit">
             <el-radio-group v-model="currentSp.dataType.specs.unit" :disabled="this.$store.state.user.currentRoles != 'webAdmin'" size="small">
-              <el-radio-button label="g">g</el-radio-button>
-              <el-radio-button label="ml">ml</el-radio-button>
-              <el-radio-button>其他</el-radio-button>
+              <el-radio-button label="g">{{$t('table.g')}}</el-radio-button>
+              <el-radio-button label="ml">{{$t('table.ml')}}</el-radio-button>
+              <el-radio-button>{{$t('table.other')}}</el-radio-button>
             </el-radio-group>
             <el-input
               v-show="currentSp.dataType.specs.unit != 'g' && currentSp.dataType.specs.unit != 'ml'"
@@ -331,9 +355,9 @@
           </el-form-item>
           <el-form-item :label="$t('table.specificationUnitName')" prop="specificationUnitName">
             <el-radio-group v-model="currentSp.dataType.specs.unitName" :disabled="this.$store.state.user.currentRoles != 'webAdmin'" size="small">
-              <el-radio-button label="克" aria-checked="1">克</el-radio-button>
-              <el-radio-button label="毫升">毫升</el-radio-button>
-              <el-radio-button>其他</el-radio-button>
+              <el-radio-button label="克" aria-checked="1">{{$t('table.g')}}</el-radio-button>
+              <el-radio-button label="毫升">{{$t('table.ml')}}</el-radio-button>
+              <el-radio-button>{{$t('table.other')}}</el-radio-button>
             </el-radio-group>
             <el-input
               v-show="currentSp.dataType.specs.unitName != '克' && currentSp.dataType.specs.unitName != '毫升'"
@@ -359,6 +383,124 @@
       </div>
     </el-dialog>
     <!-- 物模型编辑框结束 -->
+    <!-- mapping列表弹框开始 -->
+    <el-dialog :title="mappingListDialogTitle" :visible.sync="mappingListDialogVisible" width="700px">
+      <div
+        v-if="this.$store.state.user.currentRoles == 'webAdmin'"
+        class="filter-container"
+      >
+        <el-button
+          class="filter-item"
+          style="margin-left: 10px;"
+          type="primary"
+          icon="el-icon-edit"
+          @click="handleCreateMapping"
+        >{{ $t('table.addMapping') }}</el-button>
+      </div>
+      <el-table
+        v-loading="listLoading"
+        :key="tableKey"
+        :data="mappingListData"
+        border
+        fit
+        highlight-current-row
+        style="width: 100%;"
+      >
+        <el-table-column :label="$t('table.mappingName')" min-width="150px" align="center">
+          <template slot-scope="scope">
+            <span class="link-type" @click="handleUpdateMapping(scope.row)">{{ scope.row.name }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column :label="$t('table.description')" width="150px" align="center">
+          <template slot-scope="scope">
+            <span>{{ scope.row.description }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column
+          :label="$t('table.actions')"
+          align="center"
+          width="220"
+          class-name="small-padding fixed-width"
+        >
+          <template slot-scope="scope">
+            <el-button
+              type="danger"
+              icon="el-icon-delete"
+              @click="DeleteMapping(this.tempProId, scope.row.id)"
+            />
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-dialog>
+    <!-- mapping列表弹框结束 -->
+    <!-- mapping修改、新建框开始 -->
+    <el-dialog :title="updateMappingTitle" :visible.sync="updateMappingFormVisible" width="550px">
+      <el-form
+        ref="updateMappingForm"
+        :rules="rules"
+        :model="tempMapping"
+        label-position="left"
+        label-width="90px"
+        style="width: 400px; margin-left:50px;"
+      >
+        <el-form-item :label="$t('table.mappingName')" prop="mappingName">
+          <el-input
+            v-model="tempMapping.name"
+            :disabled=" mappingDialogStatus !='create'"
+            clearable
+            autofocus
+          />
+        </el-form-item>
+        <el-form-item :label="$t('table.description')" prop="description">
+          <el-input
+            v-model="tempMapping.description"
+            clearable
+          />
+        </el-form-item>
+        <el-form-item :label="$t('table.type')" prop="type">
+          <el-radio-group
+            v-model="tempMapping.type"
+            size="small"
+          >
+            <el-radio-button label="1">Binary</el-radio-button>
+            <el-radio-button label="2">JSON</el-radio-button>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item :label="$t('table.mapping')" prop="mapping">
+          <el-input
+              :autosize="{ minRows: 2, maxRows: 4}"
+              v-model="tempMapping.mapping"
+              type="textarea"
+            />
+        </el-form-item>
+      </el-form>
+      <div class="dialogButton">
+        <el-button
+          v-if="mappingDialogStatus !='create' && showMappingDetailFlag == false"
+          @click="showMappingDetailFlag = true"
+        >{{ $t('table.showDetail') }}</el-button>
+        <el-button
+          v-if="dialogStatus !='create' && showMappingDetailFlag == true"
+          @click="showMappingDetailFlag = false"
+        >{{ $t('table.closeDetail') }}</el-button>
+        <el-button @click="updateMappingFormVisible = false">{{ $t('table.cancel') }}</el-button>
+        <el-button
+          v-if="this.$store.state.user.currentRoles != 'organizationStaff'"
+          type="primary"
+          @click="mappingDialogStatus==='create'?CreateMapping(tempProId):UpdateMapping(tempProId, scope.row)"
+        >{{ $t('table.confirm') }}</el-button>
+      </div>
+      <el-collapse-transition>
+        <div v-show="showMappingDetailFlag">
+          <el-form label-position="left" label-width="90px" style="width: 400px; margin-left:50px;">
+            <el-form-item :label="$t('table.id')" prop="id">
+              <span>{{ tempMapping.id }}</span>
+            </el-form-item>
+          </el-form>
+        </div>
+      </el-collapse-transition>
+    </el-dialog>
+    <!-- mapping修改、新建框结束 -->
   </div>
 </template>
 
@@ -370,7 +512,9 @@ import {
   deleteProduct,
   updateProduct,
   createProduct,
-  getProductDetail
+  getProductDetail,
+  getMappingList,
+  createMapping
 } from '@/api/product'
 import { getOrganizationList } from '@/api/organizations'
 import waves from '@/directive/waves' // 水波纹指令
@@ -391,11 +535,17 @@ export default {
       rules: {
         // 表单验证，对应prop值  TODO:email更加详细的验证
         name: [
-          { required: true, message: '请填写产品名称', trigger: 'change' }
+          { required: true, message: this.$t('table.pleaseInputProName'), trigger: 'change' }
         ]
       },
 
       // 弹框、数据相关：
+      tempMapping: {
+        name:'',
+        description: '',
+        type: 1,
+        mapping: ''
+      },
       temp: {
         createdBy: '',
         createdName: '',
@@ -409,10 +559,11 @@ export default {
         specification: []
       },
       dialogFormVisible: false, // pro编辑框显示
+      mappingDialogStatus: '',
       dialogStatus: '', // 弹框标题初始化，标题显示为下面的textmap
       textMap: {
-        update: '编辑',
-        create: '创建'
+        update: this.$t('table.edit'),
+        create: this.$t('table.add')
       },
       spDialogStatus: '',
       organizationListData: [],
@@ -439,14 +590,20 @@ export default {
         }
       },
       currentSpIndex: '',
+      mappingListDialogVisible: false,
+      updateMappingFormVisible: false,
+      mappingListDialogTitle: '',
+      mappingListData: [],
+      updateMappingTitle: '',
 
       // 按钮相关：
+      showMappingDetailFlag: false,
       showProDetailFlag: false,
       showMoreOrgButtonFlag: true,
       showMoreProButtonFlag: true,
       showSideSelect:
         this.$store.state.user.currentRoles == 'webAdmin' &&
-        !this.$route.query.organizationID, // 是webadmin且是点击左侧sidebar入口进入的
+        !(this.$route.query.organizationID || this.$route.query.customerID), // 是webadmin且是点击左侧sidebar入口进入的
 
       // 分页相关：
       currentProPage: 1,
@@ -460,6 +617,14 @@ export default {
     this.GetProductList()
   },
   methods: {
+    resetTempMapping(){
+      this.tempMapping = {
+        name:'',
+        description: '',
+        type: 1,
+        mapping: ''
+      }
+    },
     resetTemp() { // 重置、初始化数组
       this.temp = {
         organizationId: '',
@@ -471,6 +636,7 @@ export default {
         specification: []
       }
       this.showProDetailFlag = false
+      this.showMappingDetailFlag = false
     },
     resetSp() { // 重置sp对象，默认几个数据选择
       this.currentSp = {
@@ -498,6 +664,9 @@ export default {
       if (this.$route.query.organizationID) { // 如果url中有orgid，则先保存到selectOrgId中，之后查这个就行
         // 给新建产品做准备
         this.selectOrgId = this.$route.query.organizationID
+      }
+      if (this.$route.query.customerID){
+        this.GetProductByCus(this.$route.query.customerID, page, size, status)
       }
       if (this.needRefreshProListFlag) {
         this.productListData = []
@@ -635,10 +804,19 @@ export default {
         })
       }
     },
+    GetProductByCus(cusID, page, size, status){ //获取客户的所有产品
+      getProductListByCus(cusID).then(response => {
+
+        }).catch(error => {
+            if (error.response.status == 403) { 
+              alert('SERVER TODO')
+            }
+        })
+    },
     DeleteProduct(row) { // 删除产品，修改状态为2
-      this.$confirm('将删除该产品, 是否继续?', '修改', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
+      this.$confirm(this.$t('table.willDelete'), this.$t('table.update'), {
+        confirmButtonText: this.$t('table.confirm'),
+        cancelButtonText: this.$t('table.cancel'),
         type: 'warning'
       })
         .then(() => {
@@ -656,7 +834,7 @@ export default {
                   }
                 }
                 this.$notify({
-                  title: '删除成功',
+                  title: this.$t('table.deleteSuccess'),
                   type: 'success',
                   duration: 2000
                 })
@@ -669,14 +847,14 @@ export default {
             })
             .catch(() => {
               this.$message.error({
-                message: '删除错误'
+                message: this.$t('table.deleteWrong')
               })
             })
         })
         .catch(() => {
           this.$message({
             type: 'info',
-            message: '未删除'
+            message: this.$t('table.notDelete')
           })
         })
     },
@@ -710,9 +888,9 @@ export default {
     CreateProduct(orgId) {
       this.$refs['dataForm'].validate(valid => {
         if (valid) {
-          this.$confirm('将创建该产品, 是否继续?', '创建', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
+          this.$confirm(this.$t('table.willCreatePro'), this.$t('table.create'), {
+            confirmButtonText: this.$t('table.confirm'),
+            cancelButtonText: this.$t('table.cancel'),
             type: 'warning'
           })
             .then(() => {
@@ -723,7 +901,7 @@ export default {
                   this.dialogFormVisible = false
                   this.productListData.push(response.data)
                   this.$notify({
-                    title: '新建成功',
+                    title: this.$t('table.createSuccess'),
                     type: 'success',
                     duration: 2000
                   })
@@ -735,7 +913,7 @@ export default {
                 }
               }).catch(() => {
                 this.$message.error({
-                  message: '创建错误'
+                  message: this.$t('table.createWrong')
                 })
               })
             })
@@ -744,11 +922,12 @@ export default {
         .catch(() => {
           this.$message({
             type: 'info',
-            message: '未创建'
+            message: this.$t('table.notCreate')
           })
         })
     },
     handleUpdate(row) { // 弹出修改产品框，弹出时拉取详情
+      this.tempProId = row.id
       this.GetProductDetail(row.id)
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
@@ -757,9 +936,9 @@ export default {
       })
     },
     UpdateProduct() {
-      this.$confirm('将修改该产品, 是否继续?', '修改', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
+      this.$confirm(this.$t('table.willUpdate'), this.$t('table.update'), {
+        confirmButtonText: this.$t('table.confirm'),
+        cancelButtonText: this.$t('table.cancel'),
         type: 'warning'
       })
         .then(() => {
@@ -778,7 +957,7 @@ export default {
                       }
                     }
                     this.$notify({
-                      title: '修改成功',
+                      title: this.$t('table.updateSuccess'),
                       type: 'success',
                       duration: 2000
                     })
@@ -791,7 +970,7 @@ export default {
                 })
                 .catch(() => {
                   this.$message.error({
-                    message: '修改错误'
+                    message: this.$t('table.updateWrong')
                   })
                 })
             }
@@ -800,7 +979,7 @@ export default {
         .catch(() => {
           this.$message({
             type: 'info',
-            message: '未修改'
+            message: this.$t('table.notUpdate')
           })
         })
     },
@@ -854,6 +1033,88 @@ export default {
       this.inputValue = ''
     },
     // 标签部分JS结束
+    // mapping部分
+    handleMappingList(){
+      this.mappingListDialogTitle = this.$t('table.mapping')
+      this.mappingListDialogVisible = true
+      this.$nextTick(() => {
+        this.$refs['updateMappingForm'].clearValidate()
+      })
+      this.GetMappingList(this.tempProId)
+    },
+    handleCreateMapping(){
+      this.resetTempMapping()
+      this.mappingDialogStatus = 'create'
+      this.mappingDialogTitle = this.$t('table.createMapping')
+      this.updateMappingFormVisible = true
+      this.$nextTick(() => {
+        this.$refs['updateMappingForm'].clearValidate()
+      })
+    },
+    handleUpdateMapping(row){
+      this.GetMappingDetail(row.id)
+      this.mappingDialogStatus = 'update'
+      this.mappingDialogTitle = this.$t('table.updateMapping')
+      this.updateMappingFormVisible = true
+      this.$nextTick(() => {
+        this.$refs['updateMappingForm'].clearValidate()
+      })
+    },
+    GetMappingList(proId){
+        getMappingList(proId).then(response => {
+          if (response.status == 200) {
+              this.mappingListData = response.data
+            }
+            this.listLoading = false
+        })
+    },
+    GetMappingDetail(mappingId){
+      alert(mappingId)
+    },
+    CreateMapping(proId){
+      this.$refs['updateMappingForm'].validate(valid => {
+        if (valid) {
+          this.$confirm(this.$t('table.willCreateMapping'), this.$t('table.create'), {
+            confirmButtonText: this.$t('table.confirm'),
+            cancelButtonText: this.$t('table.cancel'),
+            type: 'warning'
+          })
+            .then(() => {
+              createMapping(proId, this.tempMapping).then(response => {
+                if (response.status == 201) {
+                  this.updateMappingFormVisible = false
+                  this.mappingListData.push(response.data)
+                  this.$notify({
+                    title: this.$t('table.createSuccess'),
+                    type: 'success',
+                    duration: 2000
+                  })
+                } else {
+                  this.$notify.error({
+                    title: response,
+                    duration: 2000
+                  })
+                }
+              }).catch(() => {
+                this.$message.error({
+                  message: this.$t('table.createWrong')
+                })
+              })
+            })
+        }
+      })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: this.$t('table.notCreate')
+          })
+        })
+    },
+    UpdateMapping(proId, row){
+      alert(proId)
+      alert(row)
+    },
+    
     // 物模型部分
     handleUpdateSpecification(spIndex) { // 弹出物模型编辑框，以返回数组的index为准，复制数据
       this.currentSpIndex = spIndex

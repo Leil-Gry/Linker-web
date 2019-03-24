@@ -43,12 +43,12 @@
       highlight-current-row
       style="width: 100%;"
     >
-      <el-table-column :label="$t('table.organizationName')" min-width="150px" align="center">
+      <el-table-column :label="$t('table.organizationName')" width="350px" align="center">
         <template slot-scope="scope">
           <span class="link-type" @click="handleUpdate(scope.row)">{{ scope.row.name }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('table.description')" width="700px" align="center">
+      <el-table-column :label="$t('table.description')" min-width="500px" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.description }}</span>
         </template>
@@ -172,6 +172,9 @@
         <el-form-item :label="$t('table.organizationName')" prop="name">
           <el-input v-model="temp.name" :disabled="dialogStatus !='create'" clearable autofocus/>
         </el-form-item>
+        <el-form-item :label="$t('table.phone')" prop="phone">
+          <el-input v-model="temp.phone" clearable/>
+        </el-form-item>
         <el-form-item :label="$t('table.description')">
           <el-input
             :autosize="{ minRows: 2, maxRows: 4}"
@@ -184,9 +187,6 @@
         </el-form-item>
         <el-form-item :label="$t('table.contact')" prop="contact">
           <el-input v-model="temp.contact" clearable/>
-        </el-form-item>
-        <el-form-item :label="$t('table.phone')" prop="phone">
-          <el-input v-model="temp.phone" clearable/>
         </el-form-item>
       </el-form>
       <div class="dialogButton">

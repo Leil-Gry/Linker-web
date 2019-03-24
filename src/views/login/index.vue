@@ -34,7 +34,7 @@
           :placeholder="$t('login.password')"
           name="password"
           auto-complete="on"
-          @keyup.enter.native="handleLogin" />
+          @keyup.enter.native="loadingLogin" />
         <span class="show-pwd" @click="showPwd">
           <svg-icon icon-class="eye" />
         </span>
@@ -46,6 +46,7 @@
             :placeholder="$t('login.captcha')"
             name="captcha"
             type="text"
+            @keyup.enter.native="loadingLogin"
           />
           <img
             :src= "captchaUrl"
@@ -59,7 +60,7 @@
         :loading="loading"
         type="primary"
         style="width:100%;margin-bottom:30px;"
-        @click.native.prevent="handleLogin"
+        @click.native.prevent="loadingLogin"
       >
         {{ $t('login.logIn') }}
       </el-button>
@@ -137,6 +138,22 @@ export default {
       } else {
         this.passwordType = 'password'
       }
+    },
+    loadingLogin(){
+      this.$refs.loginForm.validate(valid => {
+        if (valid) {
+          const loading = this.$loading({
+            lock: true,
+            text: '登录中',
+            spinner: 'el-icon-loading',
+            background: 'rgba(0, 0, 0, 0.7)'
+          });
+          setTimeout(() => {
+            loading.close()
+            this.handleLogin()
+          }, 500);
+        }
+      })
     },
     handleLogin() {
       this.$refs.loginForm.validate(valid => {
