@@ -51,8 +51,8 @@
               :headers="uploadHeaders"
               :limit="files"
               :disabled="disabled"
-              class="upload-demo"
               :file-list="fileList"
+              class="upload-demo"
               drag
               multiple
               action="string">

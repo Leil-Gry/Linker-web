@@ -189,52 +189,54 @@
                 <el-col :span="4" align="center" class="col"><span>{{ $t('table.actions') }}</span></el-col>
               </el-row>
               <div v-if="this.$store.state.user.currentRoles == 'webAdmin'">
-                <template v-loading="listLoading" v-for="(item,i) in productListData">
-                  <el-row class="row">
-                    <el-col :span="6" align="center" class="col">
-                      <span class="link-type" @click="handleUpdate(item)">{{ item.name }}</span>
-                    </el-col>
-                    <el-col :span="4" align="center" class="col">
-                      <span class="link-type">{{ item.productKey }}</span>
-                    </el-col>
-                    <el-col :span="6" align="center" class="col">
-                      <span class="link-type">{{ item.description }}</span>
-                    </el-col>
-                    <el-col :span="4" align="center" class="col">
-                      <span class="link-type">{{ item.createt }}</span>
-                    </el-col>
-                    <el-col :span="4" align="center" style="margin-top: inherit">
-                      <a @click="jumpRouter('customers','?productID='+item.id)">
-                        <el-tooltip class="item" effect="dark" content="查看" placement="top-end">
-                          <svg-icon
-                            icon-class="look"
-                            class="icon-svg"
-                          />
-                        </el-tooltip>
-                      </a>
-                      <a @click="jumpRouter('devices','?productID='+item.id)">
-                        <el-tooltip class="item" effect="dark" content="管理" placement="top-end">
-                          <svg-icon
-                            icon-class="管理"
-                            class="icon-svg"
-                          />
-                        </el-tooltip>
-                      </a>
-                      <a @click="DeleteProduct(i)">
-                        <el-tooltip class="item" effect="dark" content="删除" placement="top-end" >
-                          <svg-icon
-                            icon-class="delete"
-                            class="icon-svg"/>
-                        </el-tooltip>
-                      </a>
-                    </el-col>
-                  </el-row>
+                <template>
+                  <div v-loading="listLoading" v-for="(item,i) in productListData" :key="item.name">
+                    <el-row class="row">
+                      <el-col :span="6" align="center" class="col">
+                        <span class="link-type" @click="handleUpdate(item)">{{ item.name }}</span>
+                      </el-col>
+                      <el-col :span="4" align="center" class="col">
+                        <span class="link-type">{{ item.productKey }}</span>
+                      </el-col>
+                      <el-col :span="6" align="center" class="col">
+                        <span class="link-type">{{ item.description }}</span>
+                      </el-col>
+                      <el-col :span="4" align="center" class="col">
+                        <span class="link-type">{{ item.createt }}</span>
+                      </el-col>
+                      <el-col :span="4" align="center" style="margin-top: inherit">
+                        <a @click="jumpRouter('customers','?productID='+item.id)">
+                          <el-tooltip class="item" effect="dark" content="查看" placement="top-end">
+                            <svg-icon
+                              icon-class="look"
+                              class="icon-svg"
+                            />
+                          </el-tooltip>
+                        </a>
+                        <a @click="jumpRouter('devices','?productID='+item.id)">
+                          <el-tooltip class="item" effect="dark" content="管理" placement="top-end">
+                            <svg-icon
+                              icon-class="管理"
+                              class="icon-svg"
+                            />
+                          </el-tooltip>
+                        </a>
+                        <a @click="DeleteProduct(i)">
+                          <el-tooltip class="item" effect="dark" content="删除" placement="top-end" >
+                            <svg-icon
+                              icon-class="delete"
+                              class="icon-svg"/>
+                          </el-tooltip>
+                        </a>
+                      </el-col>
+                    </el-row>
+                  </div>
                 </template>
               </div>
             </div>
           </div>
           <!-- pro分页 -->
-          <div v-if="this.selectOrgId && this.productListData.length > 0" class="pagination-container">
+          <div v-if="selectOrgId && productListData.length > 0" class="pagination-container">
             <el-button
               v-loading="listLoading"
               v-if="showMoreProButtonFlag"
@@ -517,7 +519,7 @@
             <el-button
               type="danger"
               icon="el-icon-delete"
-              @click="DeleteMapping(this.tempProId, scope.row.id)"
+              @click="DeleteMapping(tempProId, scope.row.id)"
             />
           </template>
         </el-table-column>
