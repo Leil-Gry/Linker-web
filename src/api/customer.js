@@ -7,12 +7,14 @@ export function createCustomer(proId, data) {
     data
   })
 }
+
 export function deleteCustomer(proId, cusId) {
   return request({
-    url: '/product/'+ proId + '/customer/' + cusId,
+    url: '/product/' + proId + '/customer/' + cusId,
     method: 'delete'
   })
 }
+
 export function updateCustomer(id, data) {
   return request({
     url: '/customer/' + id,
@@ -20,12 +22,14 @@ export function updateCustomer(id, data) {
     data
   })
 }
+
 export function getCustomerDetail(id) {
   return request({
     url: '/customer/' + id,
     method: 'get'
   })
 }
+
 export function getCustomerList(proId, page, size) { // 得到product下面的customer
   if (page && size) {
     return request({
@@ -35,6 +39,20 @@ export function getCustomerList(proId, page, size) { // 得到product下面的cu
   } else {
     return request({
       url: '/customer?productId=' + proId + '&&page=1&&size=10',
+      method: 'get'
+    })
+  }
+}
+
+export function getAllProductofACustomer(cusId, page, size) { // 得到customer下面的product
+  if (page && size) {
+    return request({
+      url: '/customer/' + cusId + '/product',
+      method: 'get'
+    })
+  } else {
+    return request({
+      url: '/customer/' + cusId + '/product',
       method: 'get'
     })
   }
@@ -55,12 +73,14 @@ export function createCustomerStaff(data) {
     data
   })
 }
+
 export function deleteCustomerStaff(id) {
   return request({
     url: '/user/' + id,
     method: 'delete'
   })
 }
+
 export function updateCustomerStaff(id, data) {
   return request({
     url: '/user/' + id,
@@ -68,6 +88,7 @@ export function updateCustomerStaff(id, data) {
     data
   })
 }
+
 export function getCustomerStaffList(customerId) {
   return request({
     url: '/user?customerId=' + customerId,

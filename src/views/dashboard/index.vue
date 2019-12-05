@@ -1,10 +1,10 @@
 <template>
   <div class="dashboard-container">
-    <div class="dashboardTips">
+    <!-- <div class="dashboardTips">
       <span class="roles">{{ this.$store.state.user.currentRoles[0] }}</span>
       <span class="fullname">{{ this.$store.state.user.fullname }}</span>
-    </div>
-    <img src="https://wpimg.wallstcn.com/0e03b7da-db9e-4819-ba10-9016ddfdaed3" class="emptyGif">
+    </div> -->
+    <!-- <img src="https://wpimg.wallstcn.com/0e03b7da-db9e-4819-ba10-9016ddfdaed3" class="emptyGif"> -->
     <component :is="currentRole"/>
   </div>
 </template>
@@ -43,9 +43,9 @@ export default {
   width: 45%;
   margin: 0 auto;
 }
-.dashboard-container{
+/* .dashboard-container{
   background-color: #e3e3e3;
-}
+} */
 .dashboardTips{
   width: 200px;
   margin: 0 20px;

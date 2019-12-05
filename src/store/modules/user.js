@@ -1,4 +1,5 @@
 import { loginByEmail, getMyInfoByAuthToken } from '@/api/login'
+import { getStatistics } from '@/api/allData'
 import { getCookie, setCookie, removeCookie } from '@/utils/auth'
 import { Message } from 'element-ui'
 
@@ -16,13 +17,18 @@ const user = {
     createdBy: '',
     organizationId: '',
     customerId: '',
-    orgCount: '',
-    customerCount: '',
-    productCount: '',
-    deviceCount: '',
+    orgCount: 0,
+    customerCount: 0,
+    product1Count: 0,
+    product2Count: 0,
+    product3Count: 0,
+    device1Count: 0,
+    device2Count: 0,
+    device4Count: 0,
     token: '',
     roles: [],
-    currentRoles: [],
+    f: [],
+    // currentRoles:'', 少了一个currentRoles 少了的意义不明
     currentRelatedId: ''
   },
 
@@ -69,11 +75,23 @@ const user = {
     SET_CUSTOMERCOUNT: (state, customerCount) => {
       state.customerCount = customerCount
     },
-    SET_PRODUCTCOUNT: (state, productCount) => {
-      state.productCount = productCount
+    SET_PRODUCT1COUNT: (state, product1Count) => {
+      state.product1Count = product1Count
     },
-    SET_DEVICECOUNT: (state, deviceCount) => {
-      state.deviceCount = deviceCount
+    SET_PRODUCT2COUNT: (state, product2Count) => {
+      state.product2Count = product2Count
+    },
+    SET_PRODUCT3COUNT: (state, product3Count) => {
+      state.product3Count = product3Count
+    },
+    SET_DEVICE1COUNT: (state, device1Count) => {
+      state.device1Count = device1Count
+    },
+    SET_DEVICE2COUNT: (state, device2Count) => {
+      state.device2Count = device2Count
+    },
+    SET_DEVICE4COUNT: (state, device4Count) => {
+      state.device4Count = device4Count
     },
     SET_TOKEN: (state, token) => {
       state.token = token
@@ -107,10 +125,10 @@ const user = {
       return new Promise((resolve, reject) => {
         loginByEmail(email, password, captcha).then(response => {
           if (response.status == 200) {
-            setCookie('authToken', response.data.token)// 在这里设置token到Cookie，通过Cookie里的token查用户信息，存到state里
+            setCookie('authToken', response.data.token)//  在这里设置token到Cookie，通过Cookie里的token查用户信息，存到state里
             commit('SET_TOKEN', response.data.token)
             resolve()
-          } else { // 不知道为什么全局方法无效，单独引用了message
+          } else { //  不知道为什么全局方法无效，单独引用了message
             Message.error({
               message: response
             })
@@ -126,6 +144,7 @@ const user = {
     GetUserInfo({ commit, state }) {
       return new Promise((resolve, reject) => {
         getMyInfoByAuthToken().then(response => {
+          //  console.log("***********"+response.data.id)
           if (!response.data) {
             reject('获取用户信息错误')
           } else {
@@ -133,7 +152,7 @@ const user = {
             var currentRoles = []
             var currentRelatedId = ''
             const data = response.data
-            for (var i = 0; i < data.roles.length; i++) {
+            for (let i = 0; i < data.roles.length; i++) {
               switch (true) {
                 case data.roles[i].role == '1':
                   roles[i] = ['webAdmin']; break
@@ -147,7 +166,7 @@ const user = {
                   roles[i] = ['customerStaff']; break
               }
             }
-            for (var i = 0; i < data.roles.length; i++) {
+            for (let i = 0; i < data.roles.length; i++) {
               roles[i].push(data.roles[i].identity)
             } // 权限在二维数组第一个，第二个是id
             if (getCookie('changedCurrentRoles')) {
@@ -188,6 +207,28 @@ const user = {
             // commit('SET_TYPE', data.type)// 0:Admin,1:Organization,2:customer
             // commit('SET_ROLE', data.role)// 0:Admin,1:user
             resolve(currentRoles)
+          }
+        }).catch(error => {
+          reject(error)
+        })
+      })
+    },
+
+    GetStatistics({ commit, state }) {
+      return new Promise((resolve, reject) => {
+        getStatistics().then(response => {
+          if (!response.data) {
+            reject('获取数据错误!')
+          } else {
+            commit('SET_CUSTOMERCOUNT', response.data.customer)
+            commit('SET_DEVICE1COUNT', response.data.device[2].num)
+            commit('SET_DEVICE2COUNT', response.data.device[1].num)
+            commit('SET_DEVICE4COUNT', response.data.device[0].num)
+            commit('SET_ORGCOUNT', response.data.organization)
+            commit('SET_PRODUCT1COUNT', response.data.product[0].num)
+            commit('SET_PRODUCT2COUNT', response.data.product[1].num)
+            commit('SET_PRODUCT3COUNT', response.data.product[2].num)
+            resolve()
           }
         }).catch(error => {
           reject(error)

@@ -9,7 +9,12 @@ module.exports = {
     // Paths
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
-    proxyTable: {},
+    proxyTable: {
+      // '/api': 'http://localhost:1337'
+      '/api': 'https://api.qiaolian.co',
+      // changeOrigin: true,
+      // pathRewrite:{'^/api':'/api/v1.dev'}
+    },
 
     // Various Dev Server settings
 

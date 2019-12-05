@@ -5,6 +5,7 @@ export default {
     customers: 'Customer',
     products: 'Product',
     devices: 'Device',
+    teams: 'Team',
     deviceDetail: 'Device Detail',
     allUsers: 'Admin Users'
   },
@@ -92,6 +93,7 @@ export default {
     organizations: 'Organization',
     products: 'Product',
     customers: 'Customer',
-    devices: 'Device'
+    devices: 'Device',
+    teams: 'Team'
   }
 }

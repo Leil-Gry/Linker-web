@@ -1,14 +1,14 @@
 <template>
   <el-row :gutter="30" class="panel-group">
-    <el-col v-show="showOrgButton()" :xs="12" :sm="12" :lg="6" class="card-panel-col">
+    <el-col v-show="showOrgButton()" :xs="12" :sm="12" :lg="buttonWidth()" class="card-panel-col">
       <div class="card-panel" @click="jumpRouter('organizations')">
         <div class="card-panel-icon-wrapper">
           <svg-icon icon-class="组织" class-name="card-panel-icon" />
         </div>
         <div class="card-panel-description">
           <div class="card-panel-text">{{ $t('panel.organizations') }}</div>
-          <!-- <count-to v-if="this.$store.state.user.roles != 'webAdmin'" :start-val="0" :end-val= "this.$store.state.user.orgCount" :duration="2600" class="card-panel-num"/> -->
-          <div class="card-panel-subText">点击查看</div>
+          <count-to v-if="this.$store.state.user.roles != 'webAdmin'" :start-val="0" :end-val="this.$store.state.user.orgCount" :duration="2600" class="card-panel-num"/>
+          <!-- <div class="card-panel-subText">点击查看</div> -->
         </div>
       </div>
     </el-col>
@@ -20,8 +20,7 @@
         </div>
         <div class="card-panel-description">
           <div class="card-panel-text">{{ $t('panel.customers') }}</div>
-          <!-- <count-to v-if="this.$store.state.user.roles != 'webAdmin'" :start-val="0" :end-val= "this.$store.state.user.customerCount" :duration="3200" class="card-panel-num"/> -->
-          <div class="card-panel-subText">点击查看</div>
+          <count-to v-if="this.$store.state.user.roles != 'webAdmin'" :start-val="0" :end-val="this.$store.state.user.customerCount" :duration="3200" class="card-panel-num"/>
         </div>
       </div>
     </el-col>
@@ -32,8 +31,9 @@
         </div>
         <div class="card-panel-description">
           <div class="card-panel-text">{{ $t('panel.products') }}</div>
-          <!-- <count-to v-if="this.$store.state.user.roles != 'webAdmin'" :start-val="0" :end-val= "this.$store.state.user.productCount" :duration="3000" class="card-panel-num"/> -->
-          <div class="card-panel-subText">点击查看</div>
+          <div class="card-panel-subText green"><svg-icon icon-class="运营" class-name="card-panel-subicon" /><count-to v-if="this.$store.state.user.roles != 'webAdmin'" :start-val="0" :end-val="this.$store.state.user.product1Count" :duration="3000" class="card-panel-num"/></div>
+          <div class="card-panel-subText yellow"><svg-icon icon-class="删除" class-name="card-panel-subicon" /><count-to v-if="this.$store.state.user.roles != 'webAdmin'" :start-val="0" :end-val="this.$store.state.user.product2Count" :duration="3000" class="card-panel-num"/></div>
+          <div class="card-panel-subText red"><svg-icon icon-class="停止" class-name="card-panel-subicon" /><count-to v-if="this.$store.state.user.roles != 'webAdmin'" :start-val="0" :end-val="this.$store.state.user.product3Count" :duration="3000" class="card-panel-num"/></div>
         </div>
       </div>
     </el-col>
@@ -44,8 +44,9 @@
         </div>
         <div class="card-panel-description">
           <div class="card-panel-text">{{ $t('panel.devices') }}</div>
-          <!-- <count-to v-if="this.$store.state.user.roles != 'webAdmin'" :start-val="0" :end-val= "this.$store.state.user.deviceCount" :duration="3600" class="card-panel-num"/> -->
-          <div class="card-panel-subText">点击查看</div>
+          <div class="card-panel-subText green"><svg-icon icon-class="在线" class-name="card-panel-subicon" /><count-to v-if="this.$store.state.user.roles != 'webAdmin'" :start-val="0" :end-val="this.$store.state.user.device1Count" :duration="3000" class="card-panel-num"/></div>
+          <div class="card-panel-subText grey"><svg-icon icon-class="离线" class-name="card-panel-subicon" /><count-to v-if="this.$store.state.user.roles != 'webAdmin'" :start-val="0" :end-val="this.$store.state.user.device2Count" :duration="3000" class="card-panel-num"/></div>
+          <div class="card-panel-subText red"><svg-icon icon-class="停止" class-name="card-panel-subicon" /><count-to v-if="this.$store.state.user.roles != 'webAdmin'" :start-val="0" :end-val="this.$store.state.user.device4Count" :duration="3000" class="card-panel-num"/></div>
         </div>
       </div>
     </el-col>
@@ -81,7 +82,7 @@ export default {
     },
     buttonWidth() {
       if (this.$store.state.user.currentRoles == 'webAdmin') { // 四个按钮
-        return 6
+        return 12
       } else if (this.$store.state.user.type == 1) { // 三个按钮
         return 8
       } else return 12 // 两个按钮
@@ -127,6 +128,9 @@ export default {
       float: left;
       font-size: 48px;
     }
+    .card-panel-subicon{
+      font-size: 26px;
+    }
     .card-panel-description {
       float: right;
       font-weight: bold;
@@ -140,10 +144,23 @@ export default {
         margin-bottom: 12px;
       }
       .card-panel-subText{
+        float:left;
         line-height: 18px;
-        color: darkgray;
-        font-size: 12px;
         margin-bottom: 12px;
+        font-size: 16px;
+        margin-left:25px;
+      }
+      .green{
+        color:#73D7D0;
+      }
+      .yellow{
+        color:#FFBA49;
+      }
+      .red{
+        color:#FF6666;
+      }
+      .grey{
+        color:#8a8a8a;
       }
       .card-panel-num {
         font-size: 20px;

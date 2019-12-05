@@ -56,7 +56,7 @@
         :title="$t('navbar.changeRoles')"
         width="50%">
         <el-row class="panel-group">
-          <el-col v-for="item in allRoles" :xs="12" :sm="12" :lg="12" class="card-panel-col" >
+          <el-col v-for="(item,index) in allRoles" :key="index" :xs="12" :sm="12" :lg="12" class="card-panel-col" >
             <div class="card-panel" @click="changeCurrentRoles(item)">
               <div class="card-panel-icon-wrapper">
                 <svg-icon icon-class="客户" class-name="card-panel-icon" />

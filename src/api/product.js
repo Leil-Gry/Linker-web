@@ -56,9 +56,9 @@ export function getProductListByCus(cusId, page, size, status) { // 得到cus下
     })
   }
 }
-export function getProductDetail(id) { // 得到所有product，仅限webadmin
+export function getProductDetail(proId) { // 得到所有product，仅限webadmin
   return request({
-    url: '/product/' + id,
+    url: '/product/' + proId,
     method: 'get'
   })
 }
@@ -69,6 +69,7 @@ export function getMappingList(proId) {
     method: 'get'
   })
 }
+
 export function createMapping(proId, data) {
   return request({
     url: '/product/' + proId + '/mapping',
@@ -76,3 +77,18 @@ export function createMapping(proId, data) {
     data
   })
 }
+
+export function getAllTagKeys(proId) {
+  return request({
+    url: '/product/' + proId + '/tags',
+    method: 'get'
+  })
+}
+
+export function getAllTagValues(proId, tagkey) {
+  return request({
+    url: '/product/' + proId + '/tag/' + tagkey + '/values',
+    method: 'get'
+  })
+}
+

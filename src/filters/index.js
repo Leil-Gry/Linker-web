@@ -40,3 +40,9 @@ export function numberFormatter(num, digits) {
 export function toThousandFilter(num) {
   return (+num || 0).toString().replace(/^-?\d+/g, m => m.replace(/(?=(?!\b)(\d{3})+$)/g, ','))
 }
+
+export function timeFormat(val) {
+  val = val.replace(/T/g, ' ')
+  val = val.replace(/Z/g, ' ')
+  return val
+}

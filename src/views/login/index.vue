@@ -139,7 +139,7 @@ export default {
         this.passwordType = 'password'
       }
     },
-    loadingLogin(){
+    loadingLogin() {
       this.$refs.loginForm.validate(valid => {
         if (valid) {
           const loading = this.$loading({
@@ -147,11 +147,11 @@ export default {
             text: '登录中',
             spinner: 'el-icon-loading',
             background: 'rgba(0, 0, 0, 0.7)'
-          });
+          })
           setTimeout(() => {
             loading.close()
             this.handleLogin()
-          }, 500);
+          }, 500)
         }
       })
     },

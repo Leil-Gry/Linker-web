@@ -32,118 +32,42 @@
       >{{ $t('excel.export') }} Excel</el-button> -->
     </div>
     <!-- 只有webadmin显示org列表，orgadmin和orgstaff显示自己组织的详情，所以table中的按钮无需判断权限 -->
-    <!--        <el-table-->
-    <!--          v-loading="listLoading"-->
-    <!--          v-if="this.$store.state.user.currentRoles == 'webAdmin'"-->
-    <!--          :key="tableKey"-->
-    <!--          :data="organizationListData"-->
-    <!--          border-->
-    <!--          fit-->
-    <!--          stripe-->
-    <!--          highlight-current-row-->
-    <!--          style="width: 100%;"-->
-    <!--        >-->
-    <!--          <el-table-column :label="$t('table.organizationName')" width="350px" align="center">-->
-    <!--            <template slot-scope="scope" >-->
-    <!--            <span class="link-type" @click="handleUpdate(scope.row)">{{ scope.row.name }}</span>-->
-    <!--          </template>-->
-    <!--          </el-table-column>-->
-    <!--          <el-table-column :label="$t('table.description')" min-width="500px" align="center">-->
-    <!--            <template slot-scope="scope">-->
-    <!--              <span>{{ scope.row.description }}</span>-->
-    <!--            </template>-->
-    <!--          </el-table-column>-->
-    <!--          <el-table-column :label="$t('table.actions')" align="center" width="250">-->
-    <!--            <template slot-scope="scope">-->
-    <!--    &lt;!&ndash;          <el-button&ndash;&gt;-->
-    <!--    &lt;!&ndash;            size="mini"&ndash;&gt;-->
-    <!--    &lt;!&ndash;            type="primary"&ndash;&gt;-->
-    <!--    &lt;!&ndash;            @click="handleStaffList(scope.row.name, scope.row.id)"&ndash;&gt;-->
-    <!--    &lt;!&ndash;          >{{ $t('table.adminStaff') }}</el-button>&ndash;&gt;-->
-    <!--              <a @click="handleStaffList(scope.row.name, scope.row.id)">-->
-    <!--                <el-tooltip class="item" effect="dark" content="成员" placement="top-end">-->
-    <!--                  <svg-icon-->
-    <!--                    icon-class="头像"-->
-    <!--                    class="icon-svg">-->
-    <!--                  </svg-icon>-->
-    <!--                </el-tooltip>-->
-    <!--              </a>-->
-    <!--              <a @click="jumpRouter('products','?organizationID='+scope.row.id)">-->
-    <!--                <el-tooltip class="item" effect="dark" content="产品" placement="top-end">-->
-    <!--                  <svg-icon-->
-    <!--                    icon-class="产品"-->
-    <!--                    class="icon-svg"/>-->
-    <!--                </el-tooltip>-->
-    <!--              </a>-->
-    <!--              <a>-->
-    <!--                <el-tooltip class="item" effect="dark" content="删除" placement="top-end">-->
-    <!--                  <svg-icon-->
-    <!--                    icon-class="delete"-->
-    <!--                    class="icon-svg"-->
-    <!--                    @click="DeleteOrganization(scope.row)"/>-->
-    <!--                </el-tooltip>-->
-    <!--              </a>-->
-    <!--            </template>-->
-    <!--          </el-table-column>-->
-    <!--        </el-table>-->
-    <div v-if="this.$store.state.user.currentRoles == 'webAdmin'">
-      <el-row style="background-color: rgba(251,251,252,1)" class="row">
-        <el-col :span="8" align="center" class="col"><span>{{ $t('table.organizationName') }}</span></el-col>
-        <el-col :span="9" align="center" class="col"><span>{{ $t('table.description') }}</span></el-col>
-        <el-col :span="7" align="center" class="col"><span>{{ $t('table.actions') }}</span></el-col>
-      </el-row>
-      <template v-for="(item,i) in organizationListData">
-        <el-row>
-          <el-col :span="8" align="center" class="col">
-            <span class="link-type" @click="handleUpdate(item)">{{ item.name }}</span>
-          </el-col>
-          <el-col :span="9" align="center" class="col">
-            <span class="link-type" >{{ item.description }}</span>
-          </el-col>
-          <el-col :span="7" align="center" style="margin-top: inherit">
-            <a @click="handleStaffList(item.name, item.id)">
-              <el-tooltip class="item" effect="dark" content="成员" placement="top-end">
-                <svg-icon
-                  icon-class="头像"
-                  class="icon-svg"/>
-              </el-tooltip>
-            </a>
-            <a @click="jumpRouter('products','?organizationID='+i.id)">
-              <el-tooltip class="item" effect="dark" content="产品" placement="top-end">
-                <svg-icon
-                  icon-class="产品"
-                  class="icon-svg"/>
-              </el-tooltip>
-            </a>
-            <a>
-              <el-tooltip class="item" effect="dark" content="删除" placement="top-end">
-                <svg-icon
-                  icon-class="delete"
-                  class="icon-svg"
-                  @click="DeleteOrganization(i)"/>
-              </el-tooltip>
-            </a>
-          </el-col>
-        </el-row>
-      </template>
-    </div>
-    <el-row slot-scope="scope">
-      <el-col>
-        <span class="link-type" @click="handleUpdate(i)">{{ item.name }}</span>
-      </el-col>
-      <el-col>
-        <span class="link-type" @click="handleUpdate(i)">{{ item.description }}</span>
-      </el-col>
-      <el-col>
-        <span class="link-type" @click="handleUpdate(i)">
-          <a @click="handleStaffList(item.name, item.id)">
+    <el-table
+      v-loading="listLoading"
+      v-if="this.$store.state.user.currentRoles == 'webAdmin'"
+      :key="tableKey"
+      :data="organizationListData"
+      border
+      fit
+      stripe
+      highlight-current-row
+      style="width: 100%;"
+    >
+      <el-table-column :label="$t('table.organizationName')" width="350px" align="center">
+        <template slot-scope="scope" >
+          <span class="link-type" @click="handleUpdate(scope.row)">{{ scope.row.name }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column :label="$t('table.description')" min-width="500px" align="center">
+        <template slot-scope="scope">
+          <span>{{ scope.row.description }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column :label="$t('table.actions')" align="center" width="250">
+        <template slot-scope="scope">
+          <!--          <el-button-->
+          <!--            size="mini"-->
+          <!--            type="primary"-->
+          <!--            @click="handleStaffList(scope.row.name, scope.row.id)"-->
+          <!--          >{{ $t('table.adminStaff') }}</el-button>-->
+          <a @click="handleStaffList(scope.row.name, scope.row.id)">
             <el-tooltip class="item" effect="dark" content="成员" placement="top-end">
               <svg-icon
                 icon-class="头像"
                 class="icon-svg"/>
             </el-tooltip>
           </a>
-          <a @click="jumpRouter('products','?organizationID='+item.id)">
+          <a @click="jumpRouter('products','?organizationID='+scope.row.id)">
             <el-tooltip class="item" effect="dark" content="产品" placement="top-end">
               <svg-icon
                 icon-class="产品"
@@ -155,12 +79,13 @@
               <svg-icon
                 icon-class="delete"
                 class="icon-svg"
-                @click="DeleteOrganization(i)"/>
+                @click="DeleteOrganization(scope.row)"/>
             </el-tooltip>
           </a>
-        </span>
-      </el-col>
-    </el-row>
+        </template>
+      </el-table-column>
+    </el-table>
+
     <!-- 分页，只有webadmin需要显示这个 -->
     <div
       v-if="organizationListData.length > 0 && this.$store.state.user.currentRoles == 'webAdmin'"
@@ -474,13 +399,6 @@ export default {
   },
   data() {
     return {
-      // 测试数据
-      // OrgObj:[
-      //   {id:1, name:'中国电信杭州分公司',description:'测试组织'},
-      //   {id:2, name:'杭州市水务局',description:'仅供演示'},
-      //   {id:3, name:'浙江永贵电器股份有限公司',description:'测试组织'},
-      //   {id:4, name:'浙江微宏物联科技有限公司',description:'测试组织'},
-      // ],
       // 整体
       listLoading: true,
       tableKey: 0,
@@ -1160,15 +1078,7 @@ export default {
   margin: 0 auto;
 }
 .icon-svg{
-    font-size: 45px;
-    padding-left: 20px;
+  font-size: 45px;
+  padding-left: 20px;
 }
-.row{
-  height: 55px;
-}
-.col{
-  margin-top: 20px;
-  font-size: 15px;
-}
-
 </style>

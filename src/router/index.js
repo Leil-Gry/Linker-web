@@ -173,7 +173,43 @@ export const asyncRouterMap = [
       }
     ]
   },
-
+  {
+    path: '/diagram',
+    component: Layout,
+    redirect: 'noredirect',
+    name: 'diagram',
+    meta: { roles: ['webAdmin', 'organizationAdmin', 'customerAdmin'],
+      icon: '示意图',
+      title: 'diagram' },
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/diagram/index'),
+        name: 'diagram',
+        meta: { title: 'diagramList' }
+      },
+      {
+        path: 'detail',
+        component: () => import('@/views/diagram/detail'),
+        hidden: true,
+        name: 'detail',
+        meta: { title: 'detail' }
+      },
+      {
+        path: 'frontend',
+        component: () => import('@/views/diagram/frontend'),
+        name: 'frontend',
+        meta: { title: 'frontend' }
+      },
+      {
+        path: 'createDiagramUsage',
+        component: () => import('@/views/diagram/createDiagramUsage'),
+        hidden: true,
+        name: 'createDiagramUsage',
+        meta: { title: 'createDiagramUsage' }
+      }
+    ]
+  },
   {
     path: '/organizations',
     component: Layout,

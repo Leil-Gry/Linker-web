@@ -40,10 +40,10 @@ export function updateArticle(data) {
   })
 }
 
-export function getCustomerList(organizationID){
+export function getCustomerList(organizationID) {
   return request({
-    url:'/article/getCustomerList',
-    method:'post',
+    url: '/article/getCustomerList',
+    method: 'post',
     organizationID
   })
 }

@@ -7,3 +7,10 @@ export function getDeviceData(params) {
     data: params
   })
 }
+
+export function getStatistics() {
+  return request({
+    url: '/stats',
+    method: 'get'
+  })
+}

@@ -17,7 +17,7 @@
           @click="handleSearchOrg"
         />
         <el-menu class="el-menu-vertical-demo">
-          <el-menu-item v-for="org in organizationListData" index="2" @click="selectOrg(org.id)" align="center"> 
+          <el-menu-item v-for="org in organizationListData" :key="org.id" index="2" align="center" @click="selectOrg(org.id)">
             <span slot="title" >{{ org.name }}</span>
           </el-menu-item>
           <!-- Org分页 -->
@@ -25,16 +25,16 @@
             <el-button
               v-loading="listLoading"
               v-if="showMoreOrgButtonFlag"
-              style="width:100%"
+              style="width:35%;border:none;margin-left:25%;margin-top:2%;"
               icon="el-icon-arrow-down"
               @click="showMoreOrg"
-            >{{$t('table.more')}}</el-button>
+            >{{ $t('table.more') }}</el-button>
             <el-button
               v-if="!showMoreOrgButtonFlag"
-              style="width:100%"
+              style="width:35%;border:none;margin-left:25%;margin-top:2%;"
               icon="el-icon-arrow-up"
               @click="showLessOrg"
-            >{{$t('table.less')}}</el-button>
+            >{{ $t('table.less') }}</el-button>
           </div>
         </el-menu>
       </el-aside>
@@ -49,6 +49,19 @@
               icon="el-icon-edit"
               @click="handleCreate"
             >{{ $t('table.createProduct') }}</el-button>
+            <el-input
+              :placeholder="$t('table.productName')"
+              clearable
+              style="width: 200px;"
+              class="filter-item"
+            />
+            <el-button
+              v-waves
+              class="filter-item"
+              type="primary"
+              icon="el-icon-search"
+              @click="handleSearchOrg"
+            />
             <!-- <el-button
               v-if="productListData.length>0"
               class="filter-item"
@@ -57,90 +70,168 @@
               icon="document"
               @click="handleExport"
             >{{ $t('excel.export') }} Excel</el-button> -->
-            <el-radio-group v-if="this.selectOrgId" v-model="searchStatus" size="primary" class="filter-item" @change="handleFilterPro">
-              <el-radio-button label="1">{{$t('table.running')}}</el-radio-button>
-              <el-radio-button label="3">{{$t('table.stoped')}}</el-radio-button>
-              <el-radio-button label="2">{{$t('table.deleted')}}</el-radio-button>
-              <el-radio-button label="">{{$t('table.all')}}</el-radio-button>
-            </el-radio-group>
-            <el-table
-              v-loading="listLoading"
-              :key="tableKey"
-              :data="productListData"
-              border
-              fit
-              highlight-current-row
-              style="width: 100%;"
-              :empty-text="$t('table.emptyForm')"
-            >
-              <el-table-column :label="$t('table.productName')" min-width="150px" align="center">
-                <template slot-scope="scope">
-                  <span class="link-type" @click="handleUpdate(scope.row)">{{ scope.row.name }}</span>
+            <!--            <el-radio-group v-if="this.selectOrgId" v-model="searchStatus" size="primary" class="filter-item" @change="handleFilterPro">-->
+            <!--              <el-radio-button label="1">{{$t('table.running')}}</el-radio-button>-->
+            <!--              <el-radio-button label="3">{{$t('table.stoped')}}</el-radio-button>-->
+            <!--              <el-radio-button label="2">{{$t('table.deleted')}}</el-radio-button>-->
+            <!--              <el-radio-button label="">{{$t('table.all')}}</el-radio-button>-->
+            <!--            </el-radio-group>-->
+            <!--            <el-table-->
+            <!--              v-loading="listLoading"-->
+            <!--              :key="tableKey"-->
+            <!--              :data="productListData"-->
+            <!--              border-->
+            <!--              fit-->
+            <!--              highlight-current-row-->
+            <!--              style="width: 100%;"-->
+            <!--              :empty-text="$t('table.emptyForm')"-->
+            <!--            >-->
+            <!--              <el-table-column :label="$t('table.productName')" min-width="150px" align="center">-->
+            <!--                <template slot-scope="scope">-->
+            <!--                  <span class="link-type" @click="handleUpdate(scope.row)">{{ scope.row.name }}</span>-->
+            <!--                </template>-->
+            <!--              </el-table-column>-->
+            <!--              <el-table-column :label="$t('table.description')" min-width="50px" align="center">-->
+            <!--                <template slot-scope="scope">-->
+            <!--                  <span>{{ scope.row.description }}</span>-->
+            <!--                </template>-->
+            <!--              </el-table-column>-->
+            <!--              &lt;!&ndash; 状态显示 &ndash;&gt;-->
+            <!--              <el-table-column :label="$t('table.status')" width="95px" align="center">-->
+            <!--                <template slot-scope="scope">-->
+            <!--                  <el-tag v-if="scope.row.status == '1'">{{$t('table.running')}}</el-tag>-->
+            <!--                  <el-tag v-else-if="scope.row.status == '2'" type="info">{{$t('table.deleted')}}</el-tag>-->
+            <!--                  <el-tag v-else-if="scope.row.status == '3'" type="danger">{{$t('table.stoped')}}</el-tag>-->
+            <!--                  <el-tag v-else type="warning">{{$t('table.unknow')}}</el-tag>-->
+            <!--                </template>-->
+            <!--              </el-table-column>-->
+            <!-- 管理客户按钮 -->
+            <!--              <el-table-column-->
+            <!--                v-if="this.$store.state.user.currentRoles == 'webAdmin'"-->
+            <!--                :label="$t('table.countCustomer')"-->
+            <!--                align="center"-->
+            <!--                width="95"-->
+            <!--              >-->
+            <!--                <template slot-scope="scope">-->
+            <!--                  <el-button-->
+            <!--                    size="mini"-->
+            <!--                    type="primary"-->
+            <!--                    @click="jumpRouter('customers','?productID='+scope.row.id)"-->
+            <!--                  >{{ $t('table.adminCustomer') }}</el-button>-->
+            <!--                </template>-->
+            <!--              </el-table-column>-->
+            <!-- 管理设备按钮 -->
+            <!--              <el-table-column-->
+            <!--                v-if="this.$store.state.user.currentRoles == 'webAdmin'"-->
+            <!--                :label="$t('table.countDevices')"-->
+            <!--                align="center"-->
+            <!--                width="95"-->
+            <!--              >-->
+            <!--                <template slot-scope="scope">-->
+            <!--                  <el-button-->
+            <!--                    size="mini"-->
+            <!--                    type="primary"-->
+            <!--                    @click="jumpRouter('devices','?productID='+scope.row.id)"-->
+            <!--                  >{{ $t('table.adminDevice') }}</el-button>-->
+            <!--                </template>-->
+            <!--              </el-table-column>-->
+            <!--              &lt;!&ndash;删除按钮&ndash;&gt;-->
+            <!--              <el-table-column-->
+            <!--                v-if="this.$store.state.user.currentRoles == 'webAdmin'"-->
+            <!--                :label="$t('table.actions')"-->
+            <!--                align="center"-->
+            <!--                width="190"-->
+            <!--                class-name="small-padding fixed-width"-->
+            <!--              >-->
+            <!--                <template slot-scope="scope">-->
+            <!--                  <el-button-->
+            <!--                    v-if="scope.row.status != '2'"-->
+            <!--                    size="mini"-->
+            <!--                    type="danger"-->
+            <!--                    icon="el-icon-delete"-->
+            <!--                    @click="DeleteProduct(scope.row)"-->
+            <!--                  />-->
+            <!--                </template>-->
+            <!--                <a @click="jumpRouter('customers','?productID='+item.id)">-->
+            <!--                  <el-tooltip class="item" effect="dark" content="成员" placement="top-end">-->
+            <!--                    <svg-icon-->
+            <!--                      icon-class="头像"-->
+            <!--                      class="icon-svg"-->
+            <!--                    />-->
+            <!--                  </el-tooltip>-->
+            <!--                </a>-->
+            <!--                <a @click="jumpRouter('devices','?productID='+item.id)">-->
+            <!--                  <el-tooltip class="item" effect="dark" content="产品" placement="top-end">-->
+            <!--                    <svg-icon-->
+            <!--                      icon-class="产品"-->
+            <!--                      class="icon-svg"-->
+            <!--                    />-->
+            <!--                  </el-tooltip>-->
+            <!--                </a>-->
+            <!--                <template>-->
+            <!--                <a>-->
+            <!--                  <el-tooltip class="item" effect="dark" content="删除" placement="top-end">-->
+            <!--                    <svg-icon-->
+            <!--                      icon-class="delete"-->
+            <!--                      class="icon-svg"-->
+            <!--                      @click="DeleteProduct(i)"/>-->
+            <!--                  </el-tooltip>-->
+            <!--                </a>-->
+            <!--                </template>-->
+            <!--              </el-table-column>-->
+            <!--            </el-table>-->
+            <div style="margin-top: 10px">
+              <el-row style="background-color: rgba(251,251,252,1)" class="row">
+                <el-col :span="6" align="center" class="col"><span>{{ $t('table.productName') }}</span></el-col>
+                <el-col :span="4" align="center" class="col"><span>{{ $t('table.productKey1') }}</span></el-col>
+                <el-col :span="6" align="center" class="col"><span>{{ $t('table.description') }}</span></el-col>
+                <el-col :span="4" align="center" class="col"><span>{{ $t('table.createdAt') }}</span></el-col>
+                <el-col :span="4" align="center" class="col"><span>{{ $t('table.actions') }}</span></el-col>
+              </el-row>
+              <div v-if="this.$store.state.user.currentRoles == 'webAdmin'">
+                <template v-loading="listLoading" v-for="(item,i) in productListData">
+                  <el-row class="row">
+                    <el-col :span="6" align="center" class="col">
+                      <span class="link-type" @click="handleUpdate(item)">{{ item.name }}</span>
+                    </el-col>
+                    <el-col :span="4" align="center" class="col">
+                      <span class="link-type">{{ item.productKey }}</span>
+                    </el-col>
+                    <el-col :span="6" align="center" class="col">
+                      <span class="link-type">{{ item.description }}</span>
+                    </el-col>
+                    <el-col :span="4" align="center" class="col">
+                      <span class="link-type">{{ item.createt }}</span>
+                    </el-col>
+                    <el-col :span="4" align="center" style="margin-top: inherit">
+                      <a @click="jumpRouter('customers','?productID='+item.id)">
+                        <el-tooltip class="item" effect="dark" content="查看" placement="top-end">
+                          <svg-icon
+                            icon-class="look"
+                            class="icon-svg"
+                          />
+                        </el-tooltip>
+                      </a>
+                      <a @click="jumpRouter('devices','?productID='+item.id)">
+                        <el-tooltip class="item" effect="dark" content="管理" placement="top-end">
+                          <svg-icon
+                            icon-class="管理"
+                            class="icon-svg"
+                          />
+                        </el-tooltip>
+                      </a>
+                      <a @click="DeleteProduct(i)">
+                        <el-tooltip class="item" effect="dark" content="删除" placement="top-end" >
+                          <svg-icon
+                            icon-class="delete"
+                            class="icon-svg"/>
+                        </el-tooltip>
+                      </a>
+                    </el-col>
+                  </el-row>
                 </template>
-              </el-table-column>
-              <el-table-column :label="$t('table.description')" min-width="150px" align="center">
-                <template slot-scope="scope">
-                  <span>{{ scope.row.description }}</span>
-                </template>
-              </el-table-column>
-              <!-- 状态显示 -->
-              <el-table-column :label="$t('table.status')" width="95px" align="center">
-                <template slot-scope="scope">
-                  <el-tag v-if="scope.row.status == '1'">{{$t('table.running')}}</el-tag>
-                  <el-tag v-else-if="scope.row.status == '2'" type="info">{{$t('table.deleted')}}</el-tag>
-                  <el-tag v-else-if="scope.row.status == '3'" type="danger">{{$t('table.stoped')}}</el-tag>
-                  <el-tag v-else type="warning">{{$t('table.unknow')}}</el-tag>
-                </template>
-              </el-table-column>
-              <!-- 管理客户按钮 -->
-              <el-table-column
-                v-if="this.$store.state.user.currentRoles == 'webAdmin'"
-                :label="$t('table.countCustomer')"
-                align="center"
-                width="95"
-              >
-                <template slot-scope="scope">
-                  <el-button
-                    size="mini"
-                    type="primary"
-                    @click="jumpRouter('customers','?productID='+scope.row.id)"
-                  >{{ $t('table.adminCustomer') }}</el-button>
-                </template>
-              </el-table-column>
-              <!-- 管理设备按钮 -->
-              <el-table-column
-                v-if="this.$store.state.user.currentRoles == 'webAdmin'"
-                :label="$t('table.countDevices')"
-                align="center"
-                width="95"
-              >
-                <template slot-scope="scope">
-                  <el-button
-                    size="mini"
-                    type="primary"
-                    @click="jumpRouter('devices','?productID='+scope.row.id)"
-                  >{{ $t('table.adminDevice') }}</el-button>
-                </template>
-              </el-table-column>
-              <!--删除按钮-->
-              <el-table-column
-                v-if="this.$store.state.user.currentRoles == 'webAdmin'"
-                :label="$t('table.actions')"
-                align="center"
-                width="90"
-                class-name="small-padding fixed-width"
-              >
-                <template slot-scope="scope">
-                  <el-button
-                    v-if="scope.row.status != '2'"
-                    size="mini"
-                    type="danger"
-                    icon="el-icon-delete"
-                    @click="DeleteProduct(scope.row)"
-                  />
-                </template>
-              </el-table-column>
-            </el-table>
+              </div>
+            </div>
           </div>
           <!-- pro分页 -->
           <div v-if="this.selectOrgId && this.productListData.length > 0" class="pagination-container">
@@ -150,13 +241,13 @@
               style="width:100%"
               icon="el-icon-arrow-down"
               @click="showMorePro"
-            >{{$t('table.more')}}</el-button>
+            >{{ $t('table.more') }}</el-button>
             <el-button
               v-if="!showMoreProButtonFlag"
               style="width:100%"
               icon="el-icon-arrow-up"
               @click="showLessPro"
-            >{{$t('table.less')}}</el-button>
+            >{{ $t('table.less') }}</el-button>
           </div>
         </el-row>
       </el-col>
@@ -186,9 +277,9 @@
         </el-form-item>
         <el-form-item v-if="dialogStatus !='create'" :label="$t('table.status')" prop="status">
           <el-radio-group v-model="temp.status" :disabled="this.$store.state.user.currentRoles != 'webAdmin'" size="small">
-            <el-radio-button label="1">{{$t('table.running')}}</el-radio-button>
-            <el-radio-button label="3">{{$t('table.stoped')}}</el-radio-button>
-            <el-radio-button label="2">{{$t('table.deleted')}}</el-radio-button>
+            <el-radio-button label="1">{{ $t('table.running') }}</el-radio-button>
+            <el-radio-button label="3">{{ $t('table.stoped') }}</el-radio-button>
+            <el-radio-button label="2">{{ $t('table.deleted') }}</el-radio-button>
           </el-radio-group>
         </el-form-item>
 
@@ -254,7 +345,7 @@
             class="button-new-tag"
             size="mini"
             @click="showInput"
-          >+ {{$t('table.newTag')}}</el-button>
+          >+ {{ $t('table.newTag') }}</el-button>
         </el-form-item>
         <!--标签部分结束-->
       </el-form>
@@ -342,9 +433,9 @@
           </el-form-item>
           <el-form-item :label="$t('table.specificationUnit')" prop="specificationUnit">
             <el-radio-group v-model="currentSp.dataType.specs.unit" :disabled="this.$store.state.user.currentRoles != 'webAdmin'" size="small">
-              <el-radio-button label="g">{{$t('table.g')}}</el-radio-button>
-              <el-radio-button label="ml">{{$t('table.ml')}}</el-radio-button>
-              <el-radio-button>{{$t('table.other')}}</el-radio-button>
+              <el-radio-button label="g">{{ $t('table.g') }}</el-radio-button>
+              <el-radio-button label="ml">{{ $t('table.ml') }}</el-radio-button>
+              <el-radio-button>{{ $t('table.other') }}</el-radio-button>
             </el-radio-group>
             <el-input
               v-show="currentSp.dataType.specs.unit != 'g' && currentSp.dataType.specs.unit != 'ml'"
@@ -355,9 +446,9 @@
           </el-form-item>
           <el-form-item :label="$t('table.specificationUnitName')" prop="specificationUnitName">
             <el-radio-group v-model="currentSp.dataType.specs.unitName" :disabled="this.$store.state.user.currentRoles != 'webAdmin'" size="small">
-              <el-radio-button label="克" aria-checked="1">{{$t('table.g')}}</el-radio-button>
-              <el-radio-button label="毫升">{{$t('table.ml')}}</el-radio-button>
-              <el-radio-button>{{$t('table.other')}}</el-radio-button>
+              <el-radio-button label="克" aria-checked="1">{{ $t('table.g') }}</el-radio-button>
+              <el-radio-button label="毫升">{{ $t('table.ml') }}</el-radio-button>
+              <el-radio-button>{{ $t('table.other') }}</el-radio-button>
             </el-radio-group>
             <el-input
               v-show="currentSp.dataType.specs.unitName != '克' && currentSp.dataType.specs.unitName != '毫升'"
@@ -468,10 +559,10 @@
         </el-form-item>
         <el-form-item :label="$t('table.mapping')" prop="mapping">
           <el-input
-              :autosize="{ minRows: 2, maxRows: 4}"
-              v-model="tempMapping.mapping"
-              type="textarea"
-            />
+            :autosize="{ minRows: 2, maxRows: 4}"
+            v-model="tempMapping.mapping"
+            type="textarea"
+          />
         </el-form-item>
       </el-form>
       <div class="dialogButton">
@@ -519,6 +610,7 @@ import {
 import { getOrganizationList } from '@/api/organizations'
 import waves from '@/directive/waves' // 水波纹指令
 import { parseTime } from '@/utils'
+let self = this
 export default {
   name: 'ComplexTable',
   directives: {
@@ -541,7 +633,7 @@ export default {
 
       // 弹框、数据相关：
       tempMapping: {
-        name:'',
+        name: '',
         description: '',
         type: 1,
         mapping: ''
@@ -617,9 +709,17 @@ export default {
     this.GetProductList()
   },
   methods: {
-    resetTempMapping(){
+    // update_info:function(self,data){
+    //   alert(self.$store);
+    //   self.$store.commit("info",data);
+    // },
+    // open_show: function () {
+    //   let self =this;
+    //   this.update_info(self,this.flag);
+    // },
+    resetTempMapping() {
       this.tempMapping = {
-        name:'',
+        name: '',
         description: '',
         type: 1,
         mapping: ''
@@ -665,7 +765,7 @@ export default {
         // 给新建产品做准备
         this.selectOrgId = this.$route.query.organizationID
       }
-      if (this.$route.query.customerID){
+      if (this.$route.query.customerID) {
         this.GetProductByCus(this.$route.query.customerID, page, size, status)
       }
       if (this.needRefreshProListFlag) {
@@ -804,14 +904,14 @@ export default {
         })
       }
     },
-    GetProductByCus(cusID, page, size, status){ //获取客户的所有产品
+    GetProductByCus(cusID, page, size, status) { // 获取客户的所有产品
       getProductListByCus(cusID).then(response => {
 
-        }).catch(error => {
-            if (error.response.status == 403) { 
-              alert('SERVER TODO')
-            }
-        })
+      }).catch(error => {
+        if (error.response.status == 403) {
+          alert('SERVER TODO')
+        }
+      })
     },
     DeleteProduct(row) { // 删除产品，修改状态为2
       this.$confirm(this.$t('table.willDelete'), this.$t('table.update'), {
@@ -1034,7 +1134,7 @@ export default {
     },
     // 标签部分JS结束
     // mapping部分
-    handleMappingList(){
+    handleMappingList() {
       this.mappingListDialogTitle = this.$t('table.mapping')
       this.mappingListDialogVisible = true
       this.$nextTick(() => {
@@ -1042,7 +1142,7 @@ export default {
       })
       this.GetMappingList(this.tempProId)
     },
-    handleCreateMapping(){
+    handleCreateMapping() {
       this.resetTempMapping()
       this.mappingDialogStatus = 'create'
       this.mappingDialogTitle = this.$t('table.createMapping')
@@ -1051,7 +1151,7 @@ export default {
         this.$refs['updateMappingForm'].clearValidate()
       })
     },
-    handleUpdateMapping(row){
+    handleUpdateMapping(row) {
       this.GetMappingDetail(row.id)
       this.mappingDialogStatus = 'update'
       this.mappingDialogTitle = this.$t('table.updateMapping')
@@ -1060,18 +1160,18 @@ export default {
         this.$refs['updateMappingForm'].clearValidate()
       })
     },
-    GetMappingList(proId){
-        getMappingList(proId).then(response => {
-          if (response.status == 200) {
-              this.mappingListData = response.data
-            }
-            this.listLoading = false
-        })
+    GetMappingList(proId) {
+      getMappingList(proId).then(response => {
+        if (response.status == 200) {
+          this.mappingListData = response.data
+        }
+        this.listLoading = false
+      })
     },
-    GetMappingDetail(mappingId){
+    GetMappingDetail(mappingId) {
       alert(mappingId)
     },
-    CreateMapping(proId){
+    CreateMapping(proId) {
       this.$refs['updateMappingForm'].validate(valid => {
         if (valid) {
           this.$confirm(this.$t('table.willCreateMapping'), this.$t('table.create'), {
@@ -1110,11 +1210,11 @@ export default {
           })
         })
     },
-    UpdateMapping(proId, row){
+    UpdateMapping(proId, row) {
       alert(proId)
       alert(row)
     },
-    
+
     // 物模型部分
     handleUpdateSpecification(spIndex) { // 弹出物模型编辑框，以返回数组的index为准，复制数据
       this.currentSpIndex = spIndex
@@ -1216,6 +1316,17 @@ export default {
 }
 .pagination-container{
   margin: 0 20px;
+}
+.icon-svg{
+  font-size: 45px;
+  padding-left: 20px;
+}
+.row{
+  height: 55px;
+}
+.col{
+  margin-top: 20px;
+  font-size: 15px;
 }
 </style>
 

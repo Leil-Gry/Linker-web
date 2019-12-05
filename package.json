@@ -34,10 +34,12 @@
     "url": "https://github.com/PanJiaChen/vue-element-admin/issues"
   },
   "dependencies": {
-    "axios": "0.18.0",
+    "ali-oss": "^6.2.1",
+    "axios": "^0.18.0",
     "clipboard": "1.7.1",
     "codemirror": "5.39.2",
     "connect": "3.6.6",
+    "draggable-vue-directive": "^2.0.6",
     "dropzone": "5.2.0",
     "echarts": "4.2.0-rc.2",
     "element-ui": "2.4.6",
