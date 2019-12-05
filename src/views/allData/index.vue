@@ -189,6 +189,7 @@ export default {
         shortcuts: [{
           text: '最近一周',
           onClick(picker) {
+            console.log(picker)
             const end = new Date()
             const start = new Date()
             start.setTime(start.getTime() - 3600 * 1000 * 24 * 7)
